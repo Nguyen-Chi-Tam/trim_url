@@ -1,0 +1,4 @@
+- [x] Remove backdropFilter from bioDetails.jsx main container
+- [x] Change backgroundAttachment from 'fixed' to 'scroll' in bioDetails.jsx
+- [x] Remove backdropFilter from BioLinkCard background div and replace with solid background
+- [ ] Test scrolling performance

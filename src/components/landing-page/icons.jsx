@@ -1,0 +1,6 @@
+export const LinkIcon = (props) => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><path strokeWidth="2" d="M10 14a5 5 0 007.07 0l1.41-1.41a5 5 0 10-7.07-7.07L10 6"/><path strokeWidth="2" d="M14 10a5 5 0 00-7.07 0L5.5 11.43a5 5 0 107.07 7.07L14 18"/></svg>)
+export const ShieldIcon = (props) => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><path strokeWidth="2" d="M12 3l7 4v5c0 5-3.5 9-7 9s-7-4-7-9V7l7-4z"/><path strokeWidth="2" d="M9 12l2 2 4-4"/></svg>)
+export const ChartIcon = (props) => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><path strokeWidth="2" d="M4 19h16M7 10v6M12 6v10M17 13v3"/></svg>)
+export const GlobeIcon = (props) => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><circle cx="12" cy="12" r="9" strokeWidth="2"/><path strokeWidth="2" d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/></svg>)
+export const QrIcon = (props) => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><path strokeWidth="2" d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM16 14h2v2h-2zM20 18h-4v2h6v-6h-2z"/></svg>)
+export const Star = (props) => (<svg viewBox="0 0 24 24" fill="currentColor" {...props}><path d="M12 2l3.2 6.5 7.1 1-5.1 5 1.3 7.1L12 18l-6.5 3.6 1.3-7.1-5-5 7.1-1z"/></svg>)
