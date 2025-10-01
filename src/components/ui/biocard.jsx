@@ -18,6 +18,7 @@ const BioCard = ({ bio, onDelete, fetchBios, pageLoaded }) => {
   const { loading: loadingUpdate, fn: fnUpdate } = useFetch(updateBio, { id: bio?.id, user_id: user?.id });
   const { loading: loadingDelete, fn: fnDelete } = useFetch(deleteBio, bio?.id);
   const [showCard, setShowCard] = useState(false);
+  const [showCopiedPopup, setShowCopiedPopup] = useState(false);
   useEffect(() => {
     if (!loadingDelete && !loadingUpdate && (typeof pageLoaded === 'undefined' || pageLoaded)) {
       setShowCard(true);
@@ -165,13 +166,20 @@ const BioCard = ({ bio, onDelete, fetchBios, pageLoaded }) => {
               <Button onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} className={isDarkMode ? '' : 'bg-black text-white'}>
                 <Edit />
               </Button>
-              <Button onClick={(e) => {
-                e.stopPropagation();
-                navigator.clipboard.writeText(`https://trimurl.id.vn/${bio?.url}`)
-              }}
-                className={isDarkMode ? '' : 'bg-black text-white'}>
-                <Copy />
-              </Button>
+              <div className="relative">
+                <Button onClick={(e) => {
+                  e.stopPropagation();
+                  navigator.clipboard.writeText(`https://trimurlz.me/bio/${bio?.id}`);
+                  setShowCopiedPopup(true);
+                  setTimeout(() => setShowCopiedPopup(false), 2000);
+                }}
+                  className={isDarkMode ? '' : 'bg-black text-white'}>
+                  <Copy />
+                </Button>
+                <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm px-2 py-1 rounded shadow-lg z-[60] transition-opacity duration-500 ease-in-out ${showCopiedPopup ? 'opacity-100' : 'opacity-0'}`}>
+                  Đã sao chép
+                </div>
+              </div>
               <Button onClick={(e) => { e.stopPropagation(); fnDelete().then(() => fetchBios()); }} className={isDarkMode ? '' : 'bg-black text-white'}>
                 {loadingDelete ? <BeatLoader size={5} color='#5500ffff' /> : <Trash />}
               </Button>

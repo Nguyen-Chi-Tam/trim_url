@@ -18,6 +18,7 @@ const LinkCard = ({ url, fetchUrls, pageLoaded }) => {
     const [newTitle, setNewTitle] = useState(url?.title);
     const [newProfilePic, setNewProfilePic] = useState(null);
     const [showCard, setShowCard] = useState(false);
+    const [showCopiedPopup, setShowCopiedPopup] = useState(false);
     useEffect(() => {
         if (!loadingDelete && !loadingUpdate && (typeof pageLoaded === 'undefined' || pageLoaded)) {
             setShowCard(true);
@@ -185,13 +186,20 @@ const LinkCard = ({ url, fetchUrls, pageLoaded }) => {
                     <Button onClick={() => setIsEditing(true)} className={isDarkMode ? '' : 'bg-black text-white'}>
                         <Edit />
                     </Button>
-                    <Button onClick={() =>
-                        navigator.clipboard.writeText(`https://trimurl.id.vn/${url?.short_url}`)
-                    }
-                    className={isDarkMode ? '' : 'bg-black text-white'}
-                    >
-                        <Copy/>
-                    </Button>
+                    <div className="relative">
+                        <Button onClick={() => {
+                            navigator.clipboard.writeText(`https://trimurlz.me/${url?.id}/${url?.short_url}`);
+                            setShowCopiedPopup(true);
+                            setTimeout(() => setShowCopiedPopup(false), 2000);
+                        }}
+                        className={isDarkMode ? '' : 'bg-black text-white'}
+                        >
+                            <Copy/>
+                        </Button>
+                        <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm px-2 py-1 rounded shadow-lg z-[60] transition-opacity duration-500 ease-in-out ${showCopiedPopup ? 'opacity-100' : 'opacity-0'}`}>
+                            Đã sao chép
+                        </div>
+                    </div>
                     <Button onClick={downloadImage} className={isDarkMode ? '' : 'bg-black text-white'}>
                         <Download/>
                     </Button>

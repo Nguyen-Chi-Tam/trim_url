@@ -32,6 +32,7 @@ const Link = () => {
   const [newTitle, setNewTitle] = useState('');
   const [newCustomUrl, setNewCustomUrl] = useState('');
   const [newProfilePic, setNewProfilePic] = useState(null);
+  const [showCopiedPopup, setShowCopiedPopup] = useState(false);
   const {
     loading,
     data: url,
@@ -113,7 +114,7 @@ const Link = () => {
                 className="text-4xl font-extrabold"
               />
               <div className="flex items-center gap-2 w-full">
-                <span className="text-gray-500 text-lg">https://trimurl.id.vn/</span>
+                <span className="text-gray-500 text-lg">https://trimurlz.me/</span>
                 <Input
                   value={newCustomUrl}
                   onChange={(e) => setNewCustomUrl(e.target.value)}
@@ -225,12 +226,19 @@ const Link = () => {
                 }}>
                   <Edit />
                 </Button>
-                <Button variant="ghost" onClick={() =>
-                  navigator.clipboard.writeText(`https://trimurl.id.vn/${url?.short_url}`)
-                }
-                >
-                  <Copy />
-                </Button>
+                <div className="relative">
+                  <Button variant="ghost" onClick={() => {
+                    navigator.clipboard.writeText(`https://trimurl.id.vn/${url?.short_url}`);
+                    setShowCopiedPopup(true);
+                    setTimeout(() => setShowCopiedPopup(false), 2000);
+                  }}
+                  >
+                    <Copy />
+                  </Button>
+                  <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm px-2 py-1 rounded shadow-lg z-[60] transition-opacity duration-500 ease-in-out ${showCopiedPopup ? 'opacity-100' : 'opacity-0'}`}>
+                    Đã sao chép
+                  </div>
+                </div>
                 <Button variant="ghost" onClick={downloadImage}>
                   <Download />
                 </Button>
