@@ -29,6 +29,7 @@ const BioLinkCard = ({ url, isEditing = false, onDelete, shiftRight = false, pag
         <div className="relative overflow-hidden flex items-center gap-4 border border-black dark:border-white p-4 rounded-lg mt-2 mb-2"
             style={{
                 borderRadius: '0.55rem',
+                backgroundColor: 'rgba(0, 0, 0, 0.3)',
             }}>
             <div
                 style={{
@@ -37,7 +38,7 @@ const BioLinkCard = ({ url, isEditing = false, onDelete, shiftRight = false, pag
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.5)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.3)',
                     borderRadius: '0.55rem',
                     zIndex: -1,
                     transition: 'opacity 0.5s, background-color 0.3s ease'
@@ -54,7 +55,7 @@ const BioLinkCard = ({ url, isEditing = false, onDelete, shiftRight = false, pag
                 href={`/${url.id}/${url.short_url}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-2xl font-semibold hover:underline cursor-pointer text-black dark:text-white flex-1"
+                className="text-2xl font-semibold hover:underline cursor-pointer text-white flex-1"
                 style={{
                     marginLeft: shiftRight && !url.profile_pic && window.innerWidth > 768 ? '6rem' : undefined
                 }}

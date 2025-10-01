@@ -11,6 +11,20 @@ export async function getUrls(user_id) {
 }
 
 export async function deleteUrl(id) {
+  // Delete clicks associated with this URL
+  const { error: clicksError } = await supabase.from("clicks").delete().eq("url_id", id);
+  if (clicksError) {
+    console.error(clicksError.message);
+    throw new Error("Không thể xoá các click liên quan");
+  }
+
+  // Delete bio_urls associated with this URL
+  const { error: bioUrlsError } = await supabase.from("bio_urls").delete().eq("url_id", id);
+  if (bioUrlsError) {
+    console.error(bioUrlsError.message);
+    throw new Error("Không thể xoá các bio_urls liên quan");
+  }
+
   // Fetch the URL record to get the QR code file name
   const { data: urlData, error: fetchError } = await supabase.from("urls").select("short_url").eq("id", id).single();
   if (fetchError) {
