@@ -247,7 +247,7 @@ const SelectLink = ({ isOpen, onOpenChange, onLinksSelected, existingLinkIds = [
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-sm truncate">{link.title}</h3>
                     <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                      {link.short_url && `https://trimurl.id.vn/${link.short_url}`}
+                      {link.short_url && `https://trimurlz.me/${link.id}/${link.short_url}`}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-500 truncate">
                       Ngày tạo: {new Date(link.created_at).toLocaleDateString()}

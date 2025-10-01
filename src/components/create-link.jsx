@@ -203,7 +203,7 @@ export function CreateLink(){
 
         <h2 className='font-bold'>Link tuỳ chỉnh (nếu bạn cần):</h2>
         <div className="flex items-center">
-          <span className="text-gray-500 mr-2">https://trimurl.id.vn/</span>
+          <span className="text-gray-500 mr-2">https://trimurlz.me/</span>
           <Input
             id="customUrl"
             placeholder="(...)"

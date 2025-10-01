@@ -167,19 +167,19 @@ const Link = () => {
           <div className="flex flex-col gap-2">
             {url?.custom_url && (
               <a href={`/${url.id}/${url.custom_url}`} target='_blank'
-                className="text-blue-400 hover:underline cursor-pointer flex items-center gap-1 whitespace-nowrap">
+                className="text-blue-700 dark:text-blue-400 hover:underline cursor-pointer flex items-center gap-1 whitespace-nowrap">
                 <LinkIcon className='p-1 w-5 h-5 flex-shrink-0' />
                 Link tuỳ chỉnh: https://trimurlz.me/{url.id}/{url.custom_url}
               </a>
             )}
             {url && (
               <a href={`/${url.id}/${url.short_url}`} target='_blank'
-                className="text-blue-400 hover:underline cursor-pointer flex items-center gap-1 whitespace-nowrap">
+                className="text-blue-700 dark:text-blue-400 hover:underline cursor-pointer flex items-center gap-1 whitespace-nowrap">
                 <LinkIcon className='p-1 w-5 h-5 flex-shrink-0' />Link rút gọn: https://trimurlz.me/{url.id}/{url.short_url}</a>
             )}
             {url && (
               <a href={url.original_url} target='_blank'
-                className="text-blue-400 flex items-start gap-1 hover:underline cursor-pointer text-left">
+                className="text-blue-700 dark:text-blue-400 flex items-start gap-1 hover:underline cursor-pointer text-left">
                 <LinkIcon className='p-1 w-5 h-5 flex-shrink-0' />Link gốc: {url.original_url}</a>
             )}
           </div>
@@ -228,7 +228,7 @@ const Link = () => {
                 </Button>
                 <div className="relative">
                   <Button variant="ghost" onClick={() => {
-                    navigator.clipboard.writeText(`https://trimurl.id.vn/${url?.short_url}`);
+                    navigator.clipboard.writeText(`https://trimurlz.me/${url?.id}/${url?.short_url}`);
                     setShowCopiedPopup(true);
                     setTimeout(() => setShowCopiedPopup(false), 2000);
                   }}

@@ -404,7 +404,6 @@ const BioDetails = ({ bio }) => {
                   className="shadow-lg hover:shadow-xl transition-shadow duration-200 bg-blue-600 text-white hover:bg-blue-700 border-2 border-blue-700/20"
                 >
                   <Plus className="w-5 h-5" />
-                  <span className="ml-2 font-semibold">Thêm</span>
                 </Button>
               </div>
             )}

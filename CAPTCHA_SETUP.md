@@ -9,7 +9,7 @@ The CAPTCHA system has been successfully integrated into the URL shortener appli
 1. Go to the [Google reCAPTCHA Admin Console](https://www.google.com/recaptcha/admin)
 2. Click "Create" to create a new site
 3. Choose reCAPTCHA v2 → "I'm not a robot" Checkbox
-4. Add your domain (e.g., `localhost`, `trimurl.id.vn`)
+4. Add your domain (e.g., `localhost`, `trimurlz.me`)
 5. Register and get your Site Key and Secret Key
 
 ### 2. Environment Variables
