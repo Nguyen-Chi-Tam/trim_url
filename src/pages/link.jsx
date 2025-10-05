@@ -242,7 +242,7 @@ const Link = () => {
                 <Button variant="ghost" onClick={downloadImage}>
                   <Download />
                 </Button>
-                <Button variant="ghost" onClick={() => fnDelete()}>
+                <Button variant="ghost" onClick={() => fnDelete().then(() => navigate('/dashboard'))}>
                   {loadingDelete ? <BeatLoader size={5} color='#5500ffff' /> : <Trash />}
                 </Button>
               </>

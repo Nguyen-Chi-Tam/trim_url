@@ -14,7 +14,7 @@ const AppLayout = () => {
   return (
     <div className={!isLanding && !isBio ? 'main-background' : ''}>
       {!isBio && <Header />}
-      <main className="min-h-screen w-full">
+      <main className="min-h-screen w-full pt-20 mt-10">
         <Outlet />
       </main>
       {!hideFooter && (

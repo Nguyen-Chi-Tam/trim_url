@@ -17,8 +17,10 @@ const Header = () => {
         <>
         <nav
           style={{
-            position: 'sticky',
+            position: 'fixed',
             top: 0,
+            left: 0,
+            right: 0,
             zIndex: 50,
             backdropFilter: 'blur(10px)',
             backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.7)',
