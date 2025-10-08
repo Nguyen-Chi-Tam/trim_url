@@ -8,6 +8,8 @@ import Link from './pages/link.jsx';
 import BioPages from './pages/bio_pages.jsx';
 import Bio from './pages/bio.jsx';
 import Redirect from './pages/redirect.jsx';
+import ForgotPasswordPage from './pages/forgot-password.jsx';
+import ResetPasswordPage from './pages/reset-password.jsx';
 import React from 'react';
 import UrlProvider from './context.jsx';
 import RequireAuth from './components/require-auth.jsx';
@@ -23,6 +25,14 @@ const router=createBrowserRouter([
       {
         path: '/auth',
         element: <Auth/>
+      },
+      {
+        path: '/forgot-password',
+        element: <ForgotPasswordPage/>
+      },
+      {
+        path: '/reset-password',
+        element: <ResetPasswordPage/>
       },
       {
         path: '/dashboard',

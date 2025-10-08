@@ -354,7 +354,7 @@ const BioDetails = ({ bio }) => {
             </div>
 
             {/* Right side - bio details */}
-            <div className="flex-1 flex flex-col justify-center px-4 md:px-6 lg:px-0 text-center lg:text-left">
+            <div className="flex-1 flex flex-col justify-center px-4 md:px-6 lg:px-0 text-center lg:text-left" style={{ marginTop: 0, paddingTop: 0 }}>
               {isEditing ? (
                 <input
                   type="text"
@@ -369,7 +369,7 @@ const BioDetails = ({ bio }) => {
               ) : (
                 <h1 className="font-playfair font-bold text-2xl md:text-3xl lg:text-5xl mb-2 text-white">{bio.title}</h1>
               )}
-                <hr className="border-t-2 border-[#fff] mb-4 lg:mb-6" />
+              {isEditing? <hr className='mt-5'/>: <hr className="border-t-2 border-[#fff] mb-4 lg:mb-6" />}
               <div>
                 {isEditing ? (
                   <textarea
@@ -383,7 +383,7 @@ const BioDetails = ({ bio }) => {
                     rows={4}
                   />
                 ) : (
-                  <p className="text-base md:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0 mb-6 lg:mb-8 text-white">
+                  <p className="text-base md:text-lg leading-relaxed mx-auto lg:mx-0 mb-6 lg:mb-8 text-white" style={{ maxWidth: '100%' }}>
                     {bio.description || "Không có thông tin gì về trang bio này"}
                   </p>
                 )}
@@ -430,7 +430,7 @@ const BioDetails = ({ bio }) => {
                 });
               })()
             ) : (
-              <p className="text-center text-gray-300">No links available.</p>
+              <p className="text-center text-gray-300">Không có đường link nào cả</p>
             )}
           </div>
 
@@ -438,21 +438,21 @@ const BioDetails = ({ bio }) => {
           {showDiscardConfirm && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white rounded-lg p-6 max-w-sm mx-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Discard Changes?</h3>
-                <p className="text-gray-600 mb-6">You have unsaved changes that will be lost if you discard.</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Huỷ bỏ thay đổi?</h3>
+                <p className="text-gray-600 mb-6">Ngoại trừ những đường link bạn đã xoá hoặc thêm vào, tất cả các thay đổi sẽ bị huỷ bỏ</p>
                 <div className="flex space-x-3">
                   <Button
                     onClick={confirmDiscard}
                     className="bg-red-600 text-white hover:bg-red-700 flex-1"
                   >
-                    Discard
+                    Thoát
                   </Button>
                   <Button
                     onClick={cancelDiscard}
                     variant="outline"
                     className="flex-1"
                   >
-                    Cancel
+                    Huỷ
                   </Button>
                 </div>
               </div>
