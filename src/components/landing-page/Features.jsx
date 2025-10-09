@@ -15,12 +15,12 @@ export default function Features() {
       <div className="mx-auto max-w-6xl px-4">
         <h2 className="text-3xl font-bold">Tính năng nổi bật</h2>
         <p className="mt-2 text-center mx-auto text-gray-600 dark:text-gray-300">Đầy đủ công cụ để quản lý link chuyên nghiệp.</p>
-        <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-3 mx-auto w-full">
+        <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2 mx-auto w-full">
           {items.map((it) => (
             <div key={it.title} className="card group border border-black dark:border-white rounded-lg p-4">
-              <div className="flex items-start gap-4">
+              <div className="flex items-center justify-center gap-4">
                 <it.icon className="h-6 w-6 md:h-10 md:w-10 text-brand-600 transition group-hover:scale-110"/>
-                <div><h3 className="font-semibold">{it.title}</h3><p className="mt-1 text-sm text-gray-600 dark:text-gray-300">{it.desc}</p></div>
+                <div className="text-center"><h3 className="font-semibold">{it.title}</h3><p className="mt-1 text-sm text-gray-600 dark:text-gray-300">{it.desc}</p></div>
               </div>
             </div>
           ))}

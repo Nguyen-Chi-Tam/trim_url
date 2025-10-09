@@ -249,8 +249,8 @@ const BioDetails = ({ bio }) => {
   );
 
   return (
-    <div
-      className={`text-[#3a2c1a] font-montserrat min-h-screen p-8 ${!(backgroundPicPreview || bio.background) ? 'main-background' : ''}`}
+      <div
+      className={`text-[#3a2c1a] font-montserrat min-h-screen p-0 ${!(backgroundPicPreview || bio.background) ? 'main-background' : ''}`}
       style={{
         backgroundImage: (backgroundPicPreview || bio.background) ? `url(${backgroundPicPreview || bio.background})` : undefined,
         backgroundSize: 'cover',
@@ -262,6 +262,7 @@ const BioDetails = ({ bio }) => {
       }}
     >
       <div
+        className="min-h-screen"
         style={{
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -279,7 +280,7 @@ const BioDetails = ({ bio }) => {
           </Button>
         </div>
         <div
-          className="min-h-screen w-full p-8 mt-20"
+          className="min-h-screen w-full p-8"
         >
           <div className="w-full flex flex-col lg:flex-row items-center lg:items-start justify-center gap-4 lg:gap-8 px-4 lg:px-0">
             <div className="relative flex-shrink-0">
@@ -369,7 +370,6 @@ const BioDetails = ({ bio }) => {
               ) : (
                 <h1 className="font-playfair font-bold text-2xl md:text-3xl lg:text-5xl mb-2 text-white">{bio.title}</h1>
               )}
-              {isEditing? <hr className='mt-5'/>: <hr className="border-t-2 border-[#fff] mb-4 lg:mb-6" />}
               <div>
                 {isEditing ? (
                   <textarea
@@ -378,7 +378,7 @@ const BioDetails = ({ bio }) => {
                       setEditedDescription(e.target.value);
                       setHasUnsavedChanges(true);
                     }}
-                    className="text-base md:text-lg leading-relaxed w-full text-left mb-6 lg:mb-8 text-white bg-transparent border-2 border-[#e7cdb7] rounded-md p-3 focus:outline-none focus:border-white resize-none"
+                    className="text-base md:text-lg leading-relaxed w-full text-left mt-2 mb-6 lg:mb-8 text-white bg-transparent border-2 border-[#e7cdb7] rounded-md p-3 focus:outline-none focus:border-white resize-none"
                     placeholder="Mô tả về trang bio này..."
                     rows={4}
                   />

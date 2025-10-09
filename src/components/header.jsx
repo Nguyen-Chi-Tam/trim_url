@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "./ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
-import { LogOut, User, Moon, Sun, LinkIcon } from "lucide-react";
+import { LogOut, User, Moon, Sun, LinkIcon, BookImage } from "lucide-react";
 import { UrlState } from '@/context.jsx';
 import useFetch from '@/hooks/use-fetch';
 import { logout } from '@/db/apiauth';
@@ -65,8 +65,13 @@ const Header = () => {
                                     <Link to="/dashboard" className="flex">
                                     <LinkIcon className="mr-2 h-4 w-4" /><span>Links</span></Link></DropdownMenuItem>
                                 <DropdownMenuItem>
+                                    <Link to="/profile" className="flex">
+                                    <User className="mr-2 h-4 w-4" /><span>Profile</span>
+                                    </Link>
+                                    </DropdownMenuItem>
+                                <DropdownMenuItem>
                                     <Link to="/bio_pages" className="flex">
-                                    <User className="mr-2 h-4 w-4" /><span>Trang Bio</span>
+                                    <BookImage className="mr-2 h-4 w-4" /><span>Trang Bio</span>
                                     </Link>
                                     </DropdownMenuItem>
                                 <DropdownMenuItem className="text-red-400">

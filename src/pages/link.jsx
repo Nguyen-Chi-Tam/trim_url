@@ -100,7 +100,7 @@ const Link = () => {
   };
 
   return (
-    <div className='ml-10 mr-10 mt-10 mb-10'>
+    <div className='ml-10 mr-10 mt-15 mb-10'>
       {(loading || loadingStats) && <BarLoader className="mb-4" width={"100%"} color="#36d7b7" />}
       <div className='flex flex-col gap-8 xl:flex-row justify-between'>
         

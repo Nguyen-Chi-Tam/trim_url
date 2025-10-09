@@ -10,6 +10,7 @@ import Bio from './pages/bio.jsx';
 import Redirect from './pages/redirect.jsx';
 import ForgotPasswordPage from './pages/forgot-password.jsx';
 import ResetPasswordPage from './pages/reset-password.jsx';
+import Profile from './pages/profile.jsx';
 import React from 'react';
 import UrlProvider from './context.jsx';
 import RequireAuth from './components/require-auth.jsx';
@@ -36,7 +37,11 @@ const router=createBrowserRouter([
       },
       {
         path: '/dashboard',
-        element:<RequireAuth><Dashboard/></RequireAuth> 
+        element:<RequireAuth><Dashboard/></RequireAuth>
+      },
+      {
+        path: '/profile',
+        element: <RequireAuth><Profile/></RequireAuth>
       },
       {
         path: '/link/:id',

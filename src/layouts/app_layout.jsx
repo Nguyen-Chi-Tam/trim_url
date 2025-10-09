@@ -12,9 +12,9 @@ const AppLayout = () => {
   const isBio = location.pathname.startsWith('/bio/');
 
   return (
-    <div className={!isLanding && !isBio ? 'main-background' : ''}>
+    <div className={!isLanding && !isBio ? 'main-background border-t-0' : 'border-t-0'}>
       {!isBio && <Header />}
-      <main className="min-h-screen w-full pt-20 mt-10">
+      <main className="min-h-screen w-full pt-20">
         <Outlet />
       </main>
       {!hideFooter && (
