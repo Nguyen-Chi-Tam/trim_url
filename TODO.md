@@ -1,7 +1,8 @@
-# Profile Page Implementation
+# TODO: Add Profile Picture Change Option
 
-## Tasks
-- [x] Create src/pages/profile.jsx with form for name and email editing, and redirect button for password change
-- [x] Update src/components/header.jsx to add profile link in user dropdown menu
-- [x] Update src/App.jsx to add route for /profile with RequireAuth
-- [ ] Test the profile update functionality and password redirect flow
+- [ ] Import Avatar components and supabase in profile.jsx
+- [ ] Add state for selectedFile and uploading
+- [ ] Add profile picture section in the form: display current avatar, file input, change button
+- [ ] Implement handleChangeProfilePic function: upload to Supabase, update user metadata, refresh user data
+- [ ] Add error handling and loading state for profile picture update
+- [ ] Test the profile picture change functionality

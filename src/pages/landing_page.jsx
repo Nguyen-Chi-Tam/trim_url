@@ -18,13 +18,13 @@ export default function LandingPage() {
     marginTop: '0.5rem',
     marginLeft:
       (window.innerWidth > 1440 && window.innerHeight > 2560)
-        ? '160px'
+        ? '150px'
         : (window.innerWidth >= 768
           ? '32px'
           : '0.5rem'),
     marginRight:
       (window.innerWidth > 1440 && window.innerHeight > 2560)
-        ? '160px'
+        ? '150px'
         : (window.innerWidth >= 768
           ? '32px'
           : '0.5rem'),
