@@ -61,20 +61,20 @@ const Header = () => {
                             <DropdownMenuContent>
                                 <DropdownMenuLabel>{user?.user_metadata.name}</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem>
+                                <DropdownMenuItem className="transition-transform duration-200 hover:scale-105">
                                     <Link to="/dashboard" className="flex">
                                     <LinkIcon className="mr-2 h-4 w-4" /><span>Links</span></Link></DropdownMenuItem>
-                                <DropdownMenuItem>
+                                <DropdownMenuItem className="transition-transform duration-200 hover:scale-105">
                                     <Link to="/profile" className="flex">
                                     <User className="mr-2 h-4 w-4" /><span>Profile</span>
                                     </Link>
                                     </DropdownMenuItem>
-                                <DropdownMenuItem>
+                                <DropdownMenuItem className="transition-transform duration-200 hover:scale-105">
                                     <Link to="/bio_pages" className="flex">
                                     <BookImage className="mr-2 h-4 w-4" /><span>Trang Bio</span>
                                     </Link>
                                     </DropdownMenuItem>
-                                <DropdownMenuItem className="text-red-400">
+                                <DropdownMenuItem className="text-red-400 transition-transform duration-200 hover:scale-105">
                                     <LogOut className="mr-2 h-4 w-4" /><span onClick={() => {
                                         fnLogout().then(() => {
                                             // Refresh user state after logout

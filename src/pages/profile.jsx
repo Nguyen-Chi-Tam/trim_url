@@ -17,7 +17,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
+  // No separate uploading state; use loading for both
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
@@ -25,13 +25,31 @@ const Profile = () => {
     setError(null);
     try {
       const updates = {};
+      let hasChanges = false;
+
+      // Handle name update
       if (name !== user?.user_metadata?.name) {
-        updates.data = { name };
+        updates.data = { ...updates.data, name };
+        hasChanges = true;
       }
-      if (Object.keys(updates).length > 0) {
+
+      // Handle profile pic update if file selected
+      if (selectedFile) {
+        const fileName = `dp-${user.user_metadata.name.split(" ").join("_")}-${Math.random()}`;
+        const { error: storageErr } = await supabase.storage.from("profile_pic").upload(fileName, selectedFile);
+        if (storageErr) throw new Error(storageErr.message);
+        const profilePicUrl = `${supabaseUrl}/storage/v1/object/public/profile_pic/${fileName}`;
+        updates.data = { ...updates.data, profile_pic: profilePicUrl };
+        hasChanges = true;
+        setSelectedFile(null); // Clear after upload
+      }
+
+      if (hasChanges) {
         await updateUser(updates);
         await fetchuser(); // Refresh user data
         alert('Cập nhật thông tin thành công');
+      } else {
+        alert('Không có thay đổi nào');
       }
     } catch (err) {
       setError(err.message);
@@ -44,28 +62,8 @@ const Profile = () => {
     navigate('/forgot-password');
   };
 
-  const handleChangeProfilePic = async () => {
-    if (!selectedFile) return;
-    setUploading(true);
-    setError(null);
-    try {
-      const fileName = `dp-${user.user_metadata.name.split(" ").join("_")}-${Math.random()}`;
-      const { error: storageErr } = await supabase.storage.from("profile_pic").upload(fileName, selectedFile);
-      if (storageErr) throw new Error(storageErr.message);
-      const profilePicUrl = `${supabaseUrl}/storage/v1/object/public/profile_pic/${fileName}`;
-      await updateUser({ data: { profile_pic: profilePicUrl } });
-      await fetchuser();
-      alert('Ảnh đại diện đã được cập nhật thành công');
-      setSelectedFile(null);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setUploading(false);
-    }
-  };
-
   return (
-    <div className="flex flex-col gap-8 mb-10 mt-10">
+    <div className="flex flex-col gap-8 mb-10 mt-30">
       {loading && <BarLoader className="mb-4" width={"100%"} color="#36d7b7" />}
       <div className='ml-10 mr-10 mt-5'>
         <Card>
@@ -81,21 +79,14 @@ const Profile = () => {
                     <AvatarImage src={user?.user_metadata?.profile_pic} alt="Profile Picture" />
                     <AvatarFallback>{user?.user_metadata?.name?.charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 w-full max-w-xs">
                     <input
                       type="file"
                       accept="image/*"
                       onChange={(e) => setSelectedFile(e.target.files[0])}
-                      className="text-sm"
+                      className="text-sm w-full"
+                      disabled={loading}
                     />
-                    <Button
-                      type="button"
-                      onClick={handleChangeProfilePic}
-                      disabled={!selectedFile || uploading}
-                      size="sm"
-                    >
-                      {uploading ? 'Đang tải lên...' : 'Thay đổi ảnh đại diện'}
-                    </Button>
                   </div>
                 </div>
               </div>
@@ -112,10 +103,10 @@ const Profile = () => {
                 />
               </div>
               <div className="flex gap-4">
-                <Button type="submit" disabled={loading}>
+                <Button type="submit" disabled={loading || (!name.trim() && !selectedFile)}>
                   {loading ? 'Đang xử lý...' : 'Thay đổi'}
                 </Button>
-                <Button type="button" variant="outline" onClick={handleChangePassword}>
+                <Button type="button" variant="outline" onClick={handleChangePassword} disabled={loading}>
                   Đổi mật khẩu
                 </Button>
               </div>

@@ -95,7 +95,7 @@ const BioPages = () => {
   };
 
   return (
-    <div className="flex flex-col gap-8 mb-10 mt-15">
+    <div className="flex flex-col gap-8 mb-10 mt-36">
       {loading && <BarLoader className="mb-4" width={"100%"} color="#36d7b7" />}
       <div className='ml-10 mr-10 flex justify-between'>
         <h1 className='text-4xl font-extrabold'>Các trang bio của tôi</h1>

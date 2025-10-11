@@ -90,7 +90,7 @@ const Dashboard = () => {
   const paginatedUrls = sortedUrls?.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="flex flex-col gap-8 mb-10 mt-10">
+    <div className="flex flex-col gap-8 mb-10 mt-30">
       {loading || loadingClicks && <BarLoader className="mb-4" width={"100%"} color="#36d7b7" />}
       <div className='ml-10 mr-10 mt-5 grid grid-cols-2 gap-4'>
         <Card>

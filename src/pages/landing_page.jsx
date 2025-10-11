@@ -56,7 +56,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen landing-background text-gray-900 dark:text-gray-100">
       <main style={mainStyle}>
-<div className={`border border-gray-300 dark:border-gray-700 rounded-lg p-4 col-span-2 flex flex-col-reverse md:flex-row items-center justify-center gap-6 mt-10 ${bgClass}`}>
+<div className={`border border-gray-300 dark:border-gray-700 rounded-lg p-4 col-span-2 flex flex-col-reverse md:flex-row items-center justify-center gap-6 mt-30 ${bgClass}`}>
           <div className={`rounded-lg p-4 col-span-2 items-center gap-6`}>
             <div className="flex-1 w-full ">
               <Hero />

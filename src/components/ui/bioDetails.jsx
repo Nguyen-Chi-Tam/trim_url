@@ -250,7 +250,7 @@ const BioDetails = ({ bio }) => {
 
   return (
       <div
-      className={`text-[#3a2c1a] font-montserrat min-h-screen p-0 ${!(backgroundPicPreview || bio.background) ? 'main-background' : ''}`}
+      className={`text-[#3a2c1a] font-montserrat min-h-screen w-full p-0 ${!(backgroundPicPreview || bio.background) ? 'main-background' : ''}`}
       style={{
         backgroundImage: (backgroundPicPreview || bio.background) ? `url(${backgroundPicPreview || bio.background})` : undefined,
         backgroundSize: 'cover',
@@ -274,13 +274,13 @@ const BioDetails = ({ bio }) => {
         }}
       >
         {/* Back to bio pages button */}
-        <div className="absolute left-8 top-8 z-50">
+        <div className="absolute left-8 top-8 z-50 ">
           <Button onClick={() => window.location.href = '/bio_pages'} className="bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 flex items-center justify-center">
             <ArrowLeft className="w-5 h-5" />
           </Button>
         </div>
         <div
-          className="min-h-screen w-full p-8"
+          className="min-h-screen w-full p-8 mt-20"
         >
           <div className="w-full flex flex-col lg:flex-row items-center lg:items-start justify-center gap-4 lg:gap-8 px-4 lg:px-0">
             <div className="relative flex-shrink-0">
@@ -293,7 +293,7 @@ const BioDetails = ({ bio }) => {
               {isEditing && (
                 <div className="mt-2 flex flex-col space-y-2 relative z-10">
                   {/* Profile Picture Controls */}
-                  <div className="flex justify-center space-x-2">
+                  <div className="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-2">
                     <input
                       type="file"
                       accept="image/*"
@@ -316,13 +316,13 @@ const BioDetails = ({ bio }) => {
                         onClick={handleRemoveProfilePic}
                         disabled={isLoading}
                       >
-                        {isLoading ? 'Đang xoá...' : 'Xoá ảnh đại diện'}
+                        Xoá ảnh đại diện
                       </button>
                     )}
                   </div>
 
                   {/* Background Picture Controls */}
-                  <div className="flex justify-center space-x-2">
+                  <div className="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-2">
                     <input
                       type="file"
                       accept="image/*"
@@ -345,7 +345,7 @@ const BioDetails = ({ bio }) => {
                         onClick={handleRemoveBackgroundPic}
                         disabled={isLoading}
                       >
-                        {isLoading ? 'Đang xoá...' : 'Xoá ảnh nền'}
+                        Xoá ảnh nền
                       </button>
                     )}
                   </div>
