@@ -1,0 +1,5 @@
+git status
+git remote -v
+git add .
+git commit -m "Commit all pending changes"
+git push origin main

@@ -13,3 +13,13 @@
 ## Current Task: Integrate profile pic upload into single "Thay đổi" button in profile.jsx
 
 - [x] Edit src/pages/profile.jsx: Remove separate handleChangeProfilePic and button; integrate upload logic into handleUpdateProfile for combined name/profile_pic updates.
+
+# TODO List for Adding Responsive Margins to Hero Input and Button
+
+## Current Task: Add 2px left/right margins to input and button in Hero.jsx for screens >768px
+
+- [ ] Edit src/components/landing-page/Hero.jsx: Add `md:mx-0.5` to Input className.
+- [ ] Edit src/components/landing-page/Hero.jsx: Add `md:mx-0.5` to Button className.
+
+## Followup
+- [ ] Verify changes by running dev server and checking responsiveness.

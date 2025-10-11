@@ -33,9 +33,9 @@ export default function Hero() {
                 value={longUrl}
                 placeholder="Nhập đường liên kết"
                 onChange={(e) => setLongUrl(e.target.value)}
-                className="h-full flex-1 py-4 px-4 border-black dark:border-white ml-2 mr-2" />
+                className={"h-full flex-1 py-4 px-4 border-black dark:border-white md:mx-0.5"} />
               <Button
-                className="h-full" type="submit" variant="destructive">Rút gọn</Button>
+                className="h-full md:mx-0.5" type="submit" variant="destructive">Rút gọn</Button>
             </form>
           </div>
         </div>
