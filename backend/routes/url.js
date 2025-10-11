@@ -193,6 +193,41 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/urls/{id}:
+ *   put:
+ *     summary: Update a URL by ID
+ *     tags: [URLs]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: URL ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               originalUrl:
+ *                 type: string
+ *               customUrl:
+ *                 type: string
+ *               expirationTime:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       200:
+ *         description: URL updated successfully
+ *       404:
+ *         description: URL not found
+ */
 router.put('/:id', [
   body('title').optional().isString(),
   body('originalUrl').optional().isURL(),

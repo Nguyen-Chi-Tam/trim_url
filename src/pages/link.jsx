@@ -100,7 +100,7 @@ const Link = () => {
   };
 
   return (
-    <div className='ml-10 mr-10 mt-30 mb-10'>
+    <div className='ml-10 mr-10 mt-36 mb-10'>
       {(loading || loadingStats) && <BarLoader className="mb-4" width={"100%"} color="#36d7b7" />}
       <div className='flex flex-col gap-8 xl:flex-row justify-between'>
         
@@ -157,7 +157,7 @@ const Link = () => {
                 <img
                   src={url.profile_pic}
                   alt="Ảnh đại diện"
-                  className="flex mb-4 max-h-125 max-w-125 object-cover ring ring-blue-500 self-start"
+                  className="flex mb-4 max-h-90 max-w-90 md:max-h-125 md:max-w-125 object-cover ring ring-blue-500 self-start"
                   style={{ borderRadius: '1.8rem' }}
                 />
               )}
