@@ -20,8 +20,8 @@ const Auth = () => {
     }
   }, [isAuthenticated, loading])
   return (
-    <div className='mt-15 flex flex-col items-center'>
-      <h1 className="text-6x1 font-extrabold">
+    <div className='mt-40 flex flex-col items-center'>
+      <h1 className="text-2xl font-extrabold">
         {longLink ? "Từ từ! Hãy đăng nhập đi đã bạn ơi 🙅‍♂️"
           : "Đăng nhập/Đăng ký"}
       </h1>

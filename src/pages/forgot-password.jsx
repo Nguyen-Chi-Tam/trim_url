@@ -3,7 +3,7 @@ import ForgotPassword from '@/components/forgot-password'
 
 const ForgotPasswordPage = () => {
     return (
-        <div className='mt-15 flex flex-col items-center'>
+        <div className='flex flex-col items-center mt-30'>
             <ForgotPassword />
         </div>
     )
