@@ -1,0 +1,10 @@
+name = "url-shortener-backend"
+main = "backend/worker.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# You must set these secrets using the wrangler CLI, not here.
+# Example: wrangler secret put SUPABASE_URL
+# Example: wrangler secret put SUPABASE_ANON_KEY
+# Example: wrangler secret put FRONTEND_URL

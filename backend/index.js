@@ -1,16 +1,10 @@
-require('dotenv').config();
+// require('dotenv').config(); // Disable for Cloudflare Workers (no filesystem)
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
 const swaggerUi = require('swagger-ui-express');
-const yaml = require('yamljs');
-const { createClient } = require('@supabase/supabase-js');
+const swaggerJsdoc = require('swagger-jsdoc');
 
-// Initialize Supabase client
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-// Import routes
 const authRoutes = require('./routes/auth');
 const urlRoutes = require('./routes/url');
 const clickRoutes = require('./routes/click');
@@ -23,18 +17,42 @@ const adminRoutes = require('./routes/admin');
 const { authenticateToken } = require('./middleware/auth');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const port = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(() => {
+  console.log('Connected to MongoDB');
+}).catch((err) => {
+  console.error('MongoDB connection error:', err);
+});
+
 // Swagger setup
-const swaggerDocument = yaml.load('./swagger.yaml');
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'URL Shortener API',
+      version: '1.0.0',
+      description: 'API documentation for URL Shortener backend',
+    },
+    servers: [
+      {
+        url: `http://localhost:${port}`,
+      },
+    ],
+  },
+  apis: ['./routes/*.js'],
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes
 app.use('/', publicRoutes); // Public redirection route
@@ -51,10 +69,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Swagger docs at http://localhost:${PORT}/api-docs`);
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
-
-module.exports = app; // For testing
