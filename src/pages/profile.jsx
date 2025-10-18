@@ -35,11 +35,30 @@ const Profile = () => {
 
       // Handle profile pic update if file selected
       if (selectedFile) {
-        const fileName = `dp-${user.user_metadata.name.split(" ").join("_")}-${Math.random()}`;
-        const { error: storageErr } = await supabase.storage.from("profile_pic").upload(fileName, selectedFile);
-        if (storageErr) throw new Error(storageErr.message);
-        const profilePicUrl = `${supabaseUrl}/storage/v1/object/public/profile_pic/${fileName}`;
-        updates.data = { ...updates.data, profile_pic: profilePicUrl };
+        // Delete previous image first (except default)
+        const currentUrl = user?.user_metadata?.profile_pic;
+        const publicPrefix = `${supabaseUrl}/storage/v1/object/public/profile_pic/`;
+        if (currentUrl && currentUrl.startsWith(publicPrefix)) {
+          const currentKey = currentUrl.replace(publicPrefix, '');
+          if (currentKey && currentKey !== 'default_user.png') {
+            const { error: removeErr } = await supabase.storage.from('profile_pic').remove([currentKey]);
+            if (removeErr) throw new Error(removeErr.message);
+          }
+        }
+
+        // Build a stable filename with extension and upload new image
+        const extFromName = selectedFile.name?.split('.').pop();
+        const extFromType = selectedFile.type?.split('/')?.[1];
+        const ext = (extFromName || extFromType || 'png').toLowerCase();
+        const fileName = `dp_${user?.id || 'user'}_${Date.now()}.${ext}`;
+
+        const { error: uploadErr } = await supabase.storage
+          .from('profile_pic')
+          .upload(fileName, selectedFile, { contentType: selectedFile.type || undefined });
+        if (uploadErr) throw new Error(uploadErr.message);
+
+        const newProfilePicUrl = `${supabaseUrl}/storage/v1/object/public/profile_pic/${fileName}`;
+        updates.data = { ...updates.data, profile_pic: newProfilePicUrl };
         hasChanges = true;
         setSelectedFile(null); // Clear after upload
       }
