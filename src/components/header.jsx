@@ -1,17 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "./ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
-import { LogOut, User, Moon, Sun, LinkIcon, BookImage } from "lucide-react";
+import { LogOut, User, Moon, Sun, LinkIcon, BookImage, Shield } from "lucide-react";
 import { UrlState } from '@/context.jsx';
 import useFetch from '@/hooks/use-fetch';
 import { logout } from '@/db/apiauth';
+import { getAdmin } from '@/db/apiAdmin';
 import { BarLoader } from 'react-spinners';
+
 const Header = () => {
     const navigate = useNavigate();
     const { user, fetchuser, isDarkMode, toggleDarkMode } = UrlState();
-    const { loading, fn: fnLogout } = useFetch(logout)
+    const { loading, fn: fnLogout } = useFetch(logout);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        const checkAdminStatus = async () => {
+            if (user) {
+                console.log("Checking admin status for user:", user.id);
+                const adminStatus = await getAdmin();
+                console.log("Admin status received:", adminStatus);
+                setIsAdmin(adminStatus);
+            } else {
+                // Ensure isAdmin is false when there's no user
+                setIsAdmin(false);
+            }
+        };
+        checkAdminStatus();
+    }, [user]);
 
     return (
         <>
@@ -35,6 +53,11 @@ const Header = () => {
 
             {/* Container for the button to control its alignment */}
             <div className="flex justify-end mr-10 items-center space-x-4">
+                {isAdmin && (
+                    <Link to="/admin">
+                        <Shield className="h-6 w-6 text-blue-500 hover:text-blue-700" />
+                    </Link>
+                )}
                 {/* Dark Mode Toggle */}
                 <button
                     onClick={toggleDarkMode}

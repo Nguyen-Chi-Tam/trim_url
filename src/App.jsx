@@ -11,6 +11,7 @@ import Redirect from './pages/redirect.jsx';
 import ForgotPasswordPage from './pages/forgot-password.jsx';
 import ResetPasswordPage from './pages/reset-password.jsx';
 import Profile from './pages/profile.jsx';
+import Admin from './pages/admin.jsx';
 import React from 'react';
 import UrlProvider from './context.jsx';
 import RequireAuth from './components/require-auth.jsx';
@@ -50,6 +51,10 @@ const router=createBrowserRouter([
       {
         path: '/bio_pages',
         element: <RequireAuth><BioPages/></RequireAuth>
+      },
+      {
+        path: '/admin',
+        element: <RequireAuth><Admin/></RequireAuth>
       },
       {
         path: '/bio/:id',

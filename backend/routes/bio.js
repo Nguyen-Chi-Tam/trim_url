@@ -3,51 +3,25 @@ const supabase = require('../supabase');
 
 const router = express.Router();
 
-// Function to generate short url
-function generateShortUrl() {
-  return Math.random().toString(36).substring(2, 8);
-}
-
-// Protected routes: /api/urls
-
-// POST /api/urls - create URL
+// POST /api/bios - create bio page
 router.post('/', async (req, res) => {
-  const { original_url, custom_url, title, qr_code, is_temporary, expiration_time, profile_pic } = req.body;
+  const { title, url, description, profile_pic, background } = req.body;
   const userId = req.user.userId;
 
-  if (!original_url) {
-    return res.status(400).json({ error: 'Original URL is required' });
+  if (!title || !url) {
+    return res.status(400).json({ error: 'Title and URL are required' });
   }
 
   try {
-    let shortUrl;
-    let attempts = 0;
-    do {
-      shortUrl = custom_url || generateShortUrl();
-      const { data } = await supabase
-        .from('urls')
-        .select('id')
-        .eq('short_url', shortUrl)
-        .single();
-      attempts++;
-    } while (data && attempts < 10); // Prevent infinite loop
-
-    if (attempts >= 10) {
-      return res.status(500).json({ error: 'Unable to generate unique short url' });
-    }
-
     const { data, error } = await supabase
-      .from('urls')
+      .from('bio_page')
       .insert({
         user_id: userId,
-        original_url,
-        short_url: shortUrl,
-        custom_url,
         title,
-        qr_code,
-        is_temporary,
-        expiration_time,
+        url,
+        description,
         profile_pic,
+        background,
         created_at: new Date().toISOString(),
       })
       .select()
@@ -63,13 +37,13 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET /api/urls - get user's URLs
+// GET /api/bios - get user's bio pages
 router.get('/', async (req, res) => {
   const userId = req.user.userId;
 
   try {
     const { data, error } = await supabase
-      .from('urls')
+      .from('bio_page')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
@@ -84,21 +58,21 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/urls/:id - get specific URL
+// GET /api/bios/:id - get specific bio page
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   const userId = req.user.userId;
 
   try {
     const { data, error } = await supabase
-      .from('urls')
+      .from('bio_page')
       .select('*')
       .eq('id', id)
       .eq('user_id', userId)
       .single();
 
     if (error || !data) {
-      return res.status(404).json({ error: 'URL not found' });
+      return res.status(404).json({ error: 'Bio page not found' });
     }
 
     res.json(data);
@@ -107,27 +81,25 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// PUT /api/urls/:id - update URL
+// PUT /api/bios/:id - update bio page
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
-  const { original_url, custom_url, title, qr_code, is_temporary, expiration_time, profile_pic } = req.body;
+  const { title, url, description, profile_pic, background } = req.body;
   const userId = req.user.userId;
 
-  if (!original_url) {
-    return res.status(400).json({ error: 'Original URL is required' });
+  if (!title || !url) {
+    return res.status(400).json({ error: 'Title and URL are required' });
   }
 
   try {
     const { data, error } = await supabase
-      .from('urls')
+      .from('bio_page')
       .update({ 
-        original_url,
-        custom_url,
         title,
-        qr_code,
-        is_temporary,
-        expiration_time,
-        profile_pic 
+        url,
+        description,
+        profile_pic,
+        background 
       })
       .eq('id', id)
       .eq('user_id', userId)
@@ -135,7 +107,7 @@ router.put('/:id', async (req, res) => {
       .single();
 
     if (error || !data) {
-      return res.status(404).json({ error: 'URL not found' });
+      return res.status(404).json({ error: 'Bio page not found' });
     }
 
     res.json(data);
@@ -144,14 +116,14 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/urls/:id - delete URL
+// DELETE /api/bios/:id - delete bio page
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   const userId = req.user.userId;
 
   try {
     const { error } = await supabase
-      .from('urls')
+      .from('bio_page')
       .delete()
       .eq('id', id)
       .eq('user_id', userId);
@@ -160,10 +132,28 @@ router.delete('/:id', async (req, res) => {
       return res.status(400).json({ error: error.message });
     }
 
-    res.json({ message: 'URL deleted successfully' });
+    res.json({ message: 'Bio page deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 module.exports = router;
+// Public GET /api/bio-pages/:id - get bio page by id (no auth)
+router.get('/public/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const { data, error } = await supabase
+      .from('bio_page')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !data) {
+      return res.status(404).json({ error: 'Bio page not found' });
+    }
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});

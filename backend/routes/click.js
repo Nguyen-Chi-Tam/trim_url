@@ -1,82 +1,40 @@
 const express = require('express');
-const Click = require('../models/Click');
+const supabase = require('../supabase');
 
 const router = express.Router();
 
-/**
- * @swagger
- * tags:
- *   name: Clicks
- *   description: Click tracking
- */
-
-/**
- * @swagger
- * /api/clicks/{urlId}:
- *   get:
- *     summary: Get clicks for a URL
- *     tags: [Clicks]
- *     parameters:
- *       - in: path
- *         name: urlId
- *         required: true
- *         schema:
- *           type: string
- *         description: URL ID
- *     responses:
- *       200:
- *         description: List of clicks
- */
+// GET /api/clicks/:urlId - get clicks for a specific URL (analytics)
 router.get('/:urlId', async (req, res) => {
   const { urlId } = req.params;
+  const userId = req.user.userId;
+
   try {
-    const clicks = await Click.find({ urlId });
+    // First, verify the URL belongs to the user
+    const { data: url, error: urlError } = await supabase
+      .from('urls')
+      .select('id')
+      .eq('id', urlId)
+      .eq('user_id', userId)
+      .single();
+
+    if (urlError || !url) {
+      return res.status(404).json({ error: 'URL not found or access denied' });
+    }
+
+    // Get clicks for the URL
+    const { data: clicks, error: clicksError } = await supabase
+      .from('clicks')
+      .select('*')
+      .eq('url_id', urlId)
+      .order('created_at', { ascending: false });
+
+    if (clicksError) {
+      return res.status(400).json({ error: clicksError.message });
+    }
+
     res.json(clicks);
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-/**
- * @swagger
- * /api/clicks:
- *   post:
- *     summary: Add a click record
- *     tags: [Clicks]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               urlId:
- *                 type: string
- *               city:
- *                 type: string
- *               country:
- *                 type: string
- *               device:
- *                 type: string
- *     responses:
- *       201:
- *         description: Click added successfully
- *       500:
- *         description: Server error
- */
-router.post('/', async (req, res) => {
-  const { urlId, city, country, device } = req.body;
-  try {
-    const click = new Click({
-      urlId,
-      city,
-      country,
-      device,
-    });
-    await click.save();
-    res.status(201).json({ message: 'Click added successfully' });
-  } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

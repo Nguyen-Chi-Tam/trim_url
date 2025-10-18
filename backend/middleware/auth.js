@@ -1,33 +1,21 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
 
-const authenticateJWT = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (authHeader) {
-    const token = authHeader.split(' ')[1];
-    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-      if (err) {
-        return res.sendStatus(403);
-      }
-      req.user = user;
-      next();
-    });
-  } else {
-    res.sendStatus(401);
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access token required' });
   }
-};
 
-const authorizeRoles = (...roles) => {
-  return async (req, res, next) => {
-    const user = await User.findById(req.user.id);
-    if (!user || !roles.includes(user.role)) {
-      return res.status(403).json({ message: 'Forbidden: Insufficient role' });
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: 'Invalid token' });
     }
+
+    req.user = user;
     next();
-  };
+  });
 };
 
-module.exports = {
-  authenticateJWT,
-  authorizeRoles,
-};
+module.exports = { authenticateToken };

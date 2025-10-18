@@ -105,38 +105,6 @@ pnpm dev
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-### Backend Setup
-
-The backend is built with Node.js, Express, and MongoDB.
-
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-
-2. Install backend dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Set up environment variables. Copy `.env.example` to `.env` and update:
-   ```
-   MONGO_URI=your_mongodb_connection_string
-   JWT_SECRET=your_jwt_secret
-   PORT=5000
-   ```
-
-4. Start the backend server:
-   ```bash
-   npm start
-   ```
-
-The backend will run on [http://localhost:5000](http://localhost:5000).
-
-### API Documentation
-
-API documentation is available via Swagger UI at [http://localhost:5000/api-docs](http://localhost:5000/api-docs) when the backend is running.
-
 ## Environment Variables
 
 | Variable | Description | Required |
@@ -168,8 +136,7 @@ src/
 
 - **Frontend**: React, Vite
 - **Styling**: Tailwind CSS
-- **Backend**: Node.js, Express, MongoDB (with Supabase for auth in frontend)
-- **API Documentation**: Swagger/OpenAPI
+- **Backend**: Supabase (PostgreSQL, Auth)
 - **Deployment**: Vercel/Netlify (compatible)
 
 ## Contributing
