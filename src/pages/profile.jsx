@@ -35,38 +35,70 @@ const Profile = () => {
 
       // Handle profile pic update if file selected
       if (selectedFile) {
-        // Delete previous image first (except default)
-        const currentUrl = user?.user_metadata?.profile_pic;
+        let usedFallback = false;
+        let postAlertMessage = 'Cập nhật thông tin thành công';
+        // 1) Delete current avatar in storage if it's not the default image and is within our bucket
+        const currentUrl = user?.user_metadata?.profile_pic || '';
         const publicPrefix = `${supabaseUrl}/storage/v1/object/public/profile_pic/`;
-        if (currentUrl && currentUrl.startsWith(publicPrefix)) {
-          const currentKey = currentUrl.replace(publicPrefix, '');
-          if (currentKey && currentKey !== 'default_user.png') {
-            const { error: removeErr } = await supabase.storage.from('profile_pic').remove([currentKey]);
-            if (removeErr) throw new Error(removeErr.message);
+        const isDefault = currentUrl.endsWith('default_user.png');
+        let deletedOld = false;
+        if (currentUrl.startsWith(publicPrefix) && !isDefault) {
+          const currentPath = currentUrl.slice(publicPrefix.length); // path relative to bucket
+          try {
+            const { error: delErr } = await supabase.storage.from('profile_pic').remove([currentPath]);
+            if (delErr) {
+              // Non-fatal: continue to upload new pic
+              console.warn('Failed to delete old avatar:', delErr.message);
+            } else {
+              deletedOld = true;
+            }
+          } catch (delEx) {
+            console.warn('Error deleting old avatar:', delEx?.message || delEx);
           }
         }
 
-        // Build a stable filename with extension and upload new image
-        const extFromName = selectedFile.name?.split('.').pop();
-        const extFromType = selectedFile.type?.split('/')?.[1];
-        const ext = (extFromName || extFromType || 'png').toLowerCase();
-        const fileName = `dp_${user?.id || 'user'}_${Date.now()}.${ext}`;
+        // 2) Upload new image
+        // Keep file extension if possible
+        const guessedExt = selectedFile.name?.split('.')?.pop() || selectedFile.type?.split('/')?.pop() || 'jpg';
+        const safeBase = (user?.id || user?.user_metadata?.name || 'user').toString().replace(/\s+/g, '_');
+        const fileName = `dp-${safeBase}-${Date.now()}.${guessedExt}`;
+        const { error: storageErr } = await supabase.storage.from('profile_pic').upload(fileName, selectedFile);
 
-        const { error: uploadErr } = await supabase.storage
-          .from('profile_pic')
-          .upload(fileName, selectedFile, { contentType: selectedFile.type || undefined });
-        if (uploadErr) throw new Error(uploadErr.message);
+        if (storageErr) {
+          // If upload fails and we already deleted old one, fall back to default avatar and continue
+          if (deletedOld) {
+            const fallbackUrl = `${supabaseUrl}/storage/v1/object/public/profile_pic/default_user.png`;
+            updates.data = { ...updates.data, profile_pic: fallbackUrl };
+            hasChanges = true;
+            usedFallback = true;
+            postAlertMessage = 'Ảnh mới tải lên thất bại, hệ thống đã đặt lại ảnh mặc định. Các thông tin khác đã được cập nhật.';
+          } else {
+            throw new Error(storageErr.message);
+          }
+        }
 
-        const newProfilePicUrl = `${supabaseUrl}/storage/v1/object/public/profile_pic/${fileName}`;
-        updates.data = { ...updates.data, profile_pic: newProfilePicUrl };
-        hasChanges = true;
+        // 3) Build new public URL and update metadata if upload succeeded
+        if (!storageErr) {
+          const profilePicUrl = `${supabaseUrl}/storage/v1/object/public/profile_pic/${fileName}`;
+          updates.data = { ...updates.data, profile_pic: profilePicUrl };
+          hasChanges = true;
+        }
         setSelectedFile(null); // Clear after upload
+
+        // If we used fallback, preserve message via closure for later alert
+        if (usedFallback) {
+          // attach for outer scope alert usage by mutating a property
+          updates.__postAlertMessage = postAlertMessage;
+        }
       }
 
       if (hasChanges) {
+        // Extract possible post alert message
+        const postMsg = updates.__postAlertMessage;
+        if ('__postAlertMessage' in updates) delete updates.__postAlertMessage;
         await updateUser(updates);
         await fetchuser(); // Refresh user data
-        alert('Cập nhật thông tin thành công');
+        alert(postMsg || 'Cập nhật thông tin thành công');
       } else {
         alert('Không có thay đổi nào');
       }
