@@ -38,8 +38,6 @@ const ResetPassword = () => {
                 access_token: accessToken,
                 refresh_token: refreshToken,
             });
-        } else {
-            setMessage("Liên kết không hợp lệ hoặc đã hết hạn.");
         }
     }, [searchParams]);
 
