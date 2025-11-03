@@ -9,6 +9,25 @@ export async function login({ email, password }) {
     return data;
 }
 
+// Trigger Google OAuth sign-in/up. Supabase will handle both cases.
+// redirectPath: optional path to return to after auth (e.g., '/auth?createNew=...').
+export async function loginWithGoogle({ redirectPath } = {}) {
+    const redirectTo = `${window.location.origin}${redirectPath || '/auth'}`;
+    const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo,
+            queryParams: {
+                // Request refresh token for long-lived sessions
+                access_type: 'offline',
+                prompt: 'consent',
+            },
+        },
+    });
+    if (error) throw new Error(error.message);
+    return data;
+}
+
 export async function getCurrentUser() {
     const { data: session, error } = await supabase.auth.getSession();
     if (!session.session) return null;
@@ -59,4 +78,33 @@ export async function updateUser(updates) {
     const { data, error } = await supabase.auth.updateUser(updates);
     if (error) throw new Error(error.message);
     return data;
+}
+
+// Ensure user's metadata has name and profile_pic derived from OAuth provider info
+export async function ensureUserMetadataFromProvider() {
+    const { data, error } = await supabase.auth.getUser();
+    if (error) throw new Error(error.message);
+    const user = data?.user;
+    if (!user) return null;
+    const md = user.user_metadata || {};
+    const currentName = md.name;
+    const currentPic = md.profile_pic;
+
+    // Common fields returned by Google: name, full_name, given_name, family_name, picture, avatar_url
+    const providerName = md.name || md.full_name || (md.given_name || md.family_name ? `${md.given_name || ''} ${md.family_name || ''}`.trim() : '') || (user.email ? user.email.split('@')[0] : '');
+    const providerPic = md.profile_pic || md.avatar_url || md.picture || null;
+
+    const updates = {};
+    if (!currentName && providerName) {
+        updates.data = { ...(updates.data || {}), name: providerName };
+    }
+    if (!currentPic && providerPic) {
+        updates.data = { ...(updates.data || {}), profile_pic: providerPic };
+    }
+    if (Object.keys(updates).length > 0) {
+        const res = await supabase.auth.updateUser(updates);
+        if (res.error) throw new Error(res.error.message);
+        return res.data;
+    }
+    return null;
 }
