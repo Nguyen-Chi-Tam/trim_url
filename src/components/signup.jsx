@@ -15,7 +15,7 @@ import Error from "@/components/error"
 import { useState, useEffect } from 'react'
 import * as Yup from 'yup'
 import useFetch from '@/hooks/use-fetch'
-import { signup } from '@/db/apiauth'
+import { signup, loginWithGoogle } from '@/db/apiauth'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { UrlState } from '@/context.jsx'
 
@@ -40,6 +40,7 @@ const Signup = () => {
         }));
     }
     const { data, error, loading, fn: fnSignup } = useFetch(signup, formData);
+    const { error: gErr, loading: gLoading, fn: fnGoogle } = useFetch(loginWithGoogle);
     const { fetchuser } = UrlState();
     useEffect(() => {
         console.log("Data:", data);
@@ -67,12 +68,17 @@ const Signup = () => {
             setErrors(newErrors);
         }
     }
+    const handleGoogle = async () => {
+        const redirectPath = `/auth${longLink ? `?createNew=${encodeURIComponent(longLink)}` : ''}`;
+        await fnGoogle({ redirectPath });
+    }
     return (
         <Card>
             <CardHeader>
                 <CardTitle>Đăng ký</CardTitle>
                 <CardDescription>Chào mừng bạn mới đến với TrimURL</CardDescription>
                 {error && <Error message={error.message} />}
+                {gErr && <Error message={gErr.message} />}
             </CardHeader>
             <CardContent className="space-y-2">
                 <div className="space-y-1">
@@ -96,9 +102,12 @@ const Signup = () => {
                     {errors.profile_pic && <Error message={errors.profile_pic} />}
                 </div>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex flex-col space-y-2">
                 <Button className="w-full" onClick={handleSignup}>
                     {loading ? <BeatLoader size={10} color="#5500ffff" /> : "Tạo tài khoản mới"}
+                </Button>
+                <Button variant="outline" className="w-full" onClick={handleGoogle} disabled={gLoading}>
+                    {gLoading ? <BeatLoader size={10} color="#5500ffff" /> : "Tiếp tục với Google"}
                 </Button>
             </CardFooter>
         </Card>
