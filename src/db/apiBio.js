@@ -20,6 +20,26 @@ export async function fetchBio(id) {
   }
 }
 
+// Fetch a single bio page by url (slug)
+export async function fetchBioByUrl(url) {
+  try {
+    const { data, error } = await supabase
+      .from('bio_page')
+      .select('*')
+      .eq('url', url)
+      .single();
+
+    if (error) {
+      console.error('Error fetching bio by url:', error);
+      throw error;
+    }
+    return data;
+  } catch (error) {
+    console.error('Exception in fetchBioByUrl:', error);
+    throw error;
+  }
+}
+
 // New function to fetch all bio pages for a user by user_id
 export async function fetchBiosByUser(user_id) {
   if (!user_id) return [];
