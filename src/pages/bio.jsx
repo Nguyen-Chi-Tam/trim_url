@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { BarLoader } from 'react-spinners';
 import Error from '@/components/error';
-import { fetchBio } from '@/db/apiBio';
+import { fetchBioByUrl } from '@/db/apiBio';
 import BioDetails from '@/components/ui/bioDetails';
 
 const Bio = () => {
-  const { id } = useParams();
+  const { url } = useParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [bio, setBio] = useState(null);
@@ -16,7 +16,7 @@ const Bio = () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await fetchBio(id);
+  const data = await fetchBioByUrl(url);
         setBio(data);
       } catch (err) {
         setError(err);
@@ -25,17 +25,13 @@ const Bio = () => {
       }
     };
 
-    if (id) {
+    if (url) {
       loadBio();
     }
-  }, [id]);
+  }, [url]);
 
   if (loading) {
     return <BarLoader className="mb-4" width={"100%"} color="#36d7b7" />;
-  }
-
-  if (error) {
-    return <Error message={error?.message} />;
   }
 
   return <BioDetails bio={bio} />;
