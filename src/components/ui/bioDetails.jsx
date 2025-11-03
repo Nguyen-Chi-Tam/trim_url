@@ -3,7 +3,7 @@ import { updateBio } from '@/db/apiBio';
 import BioLinkCard from './bio-linkcard';
 import { getBioUrls, deleteBioUrl, addBioUrl } from '@/db/apiBio';
 import { Button } from './button';
-import { X, Plus, ArrowLeft } from 'lucide-react';
+import { X, Plus, ArrowLeft, House, RotateCcw } from 'lucide-react';
 import SelectLink from '../select-link';
 import { UrlState } from '@/context';
 
@@ -46,7 +46,47 @@ const BioDetails = ({ bio }) => {
   }, [bio]);
 
   if (!bio) {
-    return <div className="p-8 text-center text-gray-500">Trang bio không tồn tại</div>;
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center p-6 bg-[#0b0b0b] bg-opacity-60">
+        <div className="max-w-xl w-full bg-white/95 backdrop-blur rounded-xl shadow-xl p-8 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
+            <X className="h-6 w-6" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Không tìm thấy trang bio</h1>
+          <p className="text-gray-600 mb-6">
+            Có vẻ như ID bạn nhập không khớp với bất kỳ trang bio nào. Hãy kiểm tra lại đường dẫn,
+            hoặc thử các lựa chọn bên dưới.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              onClick={() => (window.location.href = '/bio_pages')}
+              className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Quay lại
+            </Button>
+            <Button
+              onClick={() => (window.location.href = '/')}
+              variant="secondary"
+              className="flex-1 bg-[#e7cdb7] text-[#3a2c1a] hover:bg-[#d4bfa7]"
+            >
+              <House className="w-5 h-5 mr-2" />
+              Về trang chủ
+            </Button>
+            <Button
+              onClick={() => window.location.reload()}
+              className="flex-1 text-white bg-black hover:bg-gray-700"
+            >
+              <RotateCcw className="w-5 h-5 mr-2" />
+              Thử lại
+            </Button>
+          </div>
+          <div className="mt-6 text-sm text-gray-500">
+            Nếu bạn nghĩ đây là lỗi, vui lòng kiểm tra bạn đã đăng nhập đúng tài khoản và ID chính xác.
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const handleEditClick = () => {
@@ -59,6 +99,12 @@ const BioDetails = ({ bio }) => {
     try {
       // Prepare updates object with title and description changes
       const updates = {};
+      // Helper to slugify title to url
+      const slugify = (str) =>
+        (str || '')
+          .toLowerCase()
+          .replace(/\s+/g, '-')
+          .replace(/[^a-z0-9-]/g, '');
 
       // Check if title has changed
       if (editedTitle !== bio.title) {
@@ -84,7 +130,15 @@ const BioDetails = ({ bio }) => {
       setIsEditing(false);
       setShowDiscardConfirm(false);
 
-      // Reload to reflect changes, can be improved with state update
+      // If title changed and therefore slug (url) may have changed, redirect to the new URL
+      if (editedTitle !== bio.title) {
+        const newUrl = slugify(editedTitle);
+        if (newUrl && newUrl !== bio.url) {
+          window.location.href = `/bio/${newUrl}`;
+          return; // stop further execution
+        }
+      }
+      // Otherwise just reload current page to reflect other changes
       window.location.reload();
     } catch (error) {
       console.error('Failed to update bio:', error);
