@@ -123,7 +123,7 @@ const BioCard = ({ bio, onDelete, fetchBios, pageLoaded }) => {
                 className={"object-cover mb-4 rounded-lg border w-[250px] h-[250px] sm:w-[300px] sm:h-[300px] md:w-[300px] md:h-[300px]" + (isDarkMode ? " border-white" : " border-black")} />
             )}
             <h2 className="text-xl font-bold mb-1 w-full text-left truncate hover:underline"
-              onClick={() => navigate(`/bio/${bio.id}`)}>{bio.title}</h2>
+              onClick={() => navigate(`/bio/${bio.url}`)}>{bio.title}</h2>
           </>
         )}
         <div className="w-full flex justify-start">
@@ -169,7 +169,7 @@ const BioCard = ({ bio, onDelete, fetchBios, pageLoaded }) => {
               <div className="relative">
                 <Button onClick={(e) => {
                   e.stopPropagation();
-                  navigator.clipboard.writeText(`https://trimurlz.me/bio/${bio?.id}`);
+                  navigator.clipboard.writeText(`https://trimurlz.me/bio/${bio?.url}`);
                   setShowCopiedPopup(true);
                   setTimeout(() => setShowCopiedPopup(false), 2000);
                 }}
