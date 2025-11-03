@@ -10,7 +10,7 @@ import {
   DialogClose, DialogFooter
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import Error from "@/components/error"
+import ErrorMessage from "@/components/error"
 import { Input } from "@/components/ui/input"
 import * as Yup from 'yup';
 import QRCode from 'react-qrcode-logo';
@@ -193,13 +193,13 @@ export function CreateLink(){
         <Input id="title" placeholder="Đặt cho nó một cái tên dễ nhớ"
           value={formValues.title}
           onChange={handleChange} />
-        {errors.title && <Error message={errors.title} />}
+  {errors.title && <ErrorMessage message={errors.title} />}
 
         <h2 className='font-bold'>Link gốc:</h2>
         <Input id="longUrl" placeholder="Đường link mà bạn cần cắt ngắn"
           value={formValues.longUrl}
           onChange={handleChange} />
-        {errors.longUrl && <Error message={errors.longUrl} />}
+  {errors.longUrl && <ErrorMessage message={errors.longUrl} />}
 
         <h2 className='font-bold'>Link tuỳ chỉnh (nếu bạn cần):</h2>
         <div className="flex items-center">
@@ -233,12 +233,12 @@ export function CreateLink(){
               value={formValues.expirationTime}
               onChange={handleChange}
             />
-            {errors.expirationTime && <Error message={errors.expirationTime} />}
+            {errors.expirationTime && <ErrorMessage message={errors.expirationTime} />}
           </>
         )}
 
-        {error && <Error message={normalizeErrorMessage(error)} />}
-        {errors.general && <Error message={errors.general} />}
+  {error && <ErrorMessage message={normalizeErrorMessage(error)} />}
+  {errors.general && <ErrorMessage message={errors.general} />}
 
         {/* CAPTCHA Verification */}
         {showCaptcha && (
