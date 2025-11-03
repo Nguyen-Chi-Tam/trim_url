@@ -129,6 +129,49 @@ export async function getLongUrl(identifier) {
   return data;
 }
 
+// New: lookup by short_url for single-segment redirects like /{short_url}
+export async function getLongUrlByShort(shortUrl) {
+  console.log(`Looking up URL by short code: ${shortUrl}`);
+  const { data, error } = await supabase
+    .from("urls")
+    .select("id, original_url, custom_url, short_url, created_at")
+    .eq("short_url", shortUrl)
+    .single();
+
+  if (error) {
+    console.error("Error fetching URL by short_url:", error.message);
+    throw new Error("Không thấy đường link");
+  }
+
+  if (!data) {
+    throw new Error("Không thấy đường link");
+  }
+
+  return data;
+}
+
+// New: lookup by id AND custom_url for two-segment redirects like /{id}/{custom_url}
+export async function getLongUrlByIdAndCustom({ id, customUrl }) {
+  console.log(`Looking up URL by ID and custom: id=${id}, custom=${customUrl}`);
+  const { data, error } = await supabase
+    .from("urls")
+    .select("id, original_url, custom_url, short_url, created_at")
+    .eq("id", parseInt(id))
+    .eq("custom_url", customUrl)
+    .single();
+
+  if (error) {
+    console.error("Error fetching URL by id and custom_url:", error.message);
+    throw new Error("Không thấy đường link");
+  }
+
+  if (!data) {
+    throw new Error("Không thấy đường link");
+  }
+
+  return data;
+}
+
 export async function getUrl({id,user_id}) {
   const { data, error } = await supabase.from("urls").select("*")
   .eq("id", id).eq("user_id", user_id)
