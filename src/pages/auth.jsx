@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import Signup from '@/components/signup'
 import { useEffect } from 'react'
 import { UrlState } from '@/context.jsx'
+import { ensureUserMetadataFromProvider } from '@/db/apiauth'
 
 const Auth = () => {
   const [searchParams] = useSearchParams()
@@ -16,7 +17,16 @@ const Auth = () => {
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      navigate(`/dashboard?${longLink ? `createNew=${longLink}` : ""}`);
+      (async () => {
+        try {
+          await ensureUserMetadataFromProvider();
+        } catch (e) {
+          // Non-fatal: proceed to app even if profile sync fails
+          console.warn('ensureUserMetadataFromProvider failed:', e?.message || e);
+        } finally {
+          navigate(`/dashboard?${longLink ? `createNew=${longLink}` : ""}`);
+        }
+      })();
     }
   }, [isAuthenticated, loading])
   return (
