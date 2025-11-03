@@ -99,12 +99,6 @@ const BioDetails = ({ bio }) => {
     try {
       // Prepare updates object with title and description changes
       const updates = {};
-      // Helper to slugify title to url
-      const slugify = (str) =>
-        (str || '')
-          .toLowerCase()
-          .replace(/\s+/g, '-')
-          .replace(/[^a-z0-9-]/g, '');
 
       // Check if title has changed
       if (editedTitle !== bio.title) {
@@ -117,8 +111,9 @@ const BioDetails = ({ bio }) => {
       }
 
       // If there are text changes or picture changes, update the bio
+      let updatedRow = null;
       if (Object.keys(updates).length > 0 || selectedProfilePic || selectedBackgroundPic) {
-        await updateBio({ id: bio.id, user_id: bio.user_id }, updates, selectedProfilePic, selectedBackgroundPic);
+        updatedRow = await updateBio({ id: bio.id, user_id: bio.user_id }, updates, selectedProfilePic, selectedBackgroundPic);
       }
 
       // Clear the temporary states after successful upload
@@ -130,13 +125,10 @@ const BioDetails = ({ bio }) => {
       setIsEditing(false);
       setShowDiscardConfirm(false);
 
-      // If title changed and therefore slug (url) may have changed, redirect to the new URL
-      if (editedTitle !== bio.title) {
-        const newUrl = slugify(editedTitle);
-        if (newUrl && newUrl !== bio.url) {
-          window.location.href = `/bio/${newUrl}`;
-          return; // stop further execution
-        }
+      // If title changed and update returned a new URL, redirect to it
+      if (editedTitle !== bio.title && updatedRow?.url && updatedRow.url !== bio.url) {
+        window.location.href = `/bio/${updatedRow.url}`;
+        return; // stop further execution
       }
       // Otherwise just reload current page to reflect other changes
       window.location.reload();
