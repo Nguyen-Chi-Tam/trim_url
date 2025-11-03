@@ -1,6 +1,7 @@
 import { createContext, useEffect, useContext, useState } from 'react';
 import useFetch from './hooks/use-fetch.jsx';
 import { getCurrentUser } from './db/apiauth';
+import supabase from './db/supabase';
 
 const UrlContext = createContext();
 const UrlProvider=({children})=>{
@@ -10,6 +11,12 @@ const UrlProvider=({children})=>{
 
    useEffect(()=>{
     fetchuser();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => {
+        fetchuser();
+    });
+    return () => {
+        sub.subscription?.unsubscribe?.();
+    }
    },[])
 
    useEffect(() => {
