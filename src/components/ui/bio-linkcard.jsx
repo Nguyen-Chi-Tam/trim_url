@@ -52,7 +52,7 @@ const BioLinkCard = ({ url, isEditing = false, onDelete, shiftRight = false, pag
                     style={{ borderRadius: '0.25rem' }}
                 /> : <></>}
             <a
-                href={`/${url.id}/${url.short_url}`}
+                href={`/${url.short_url}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-2xl font-semibold hover:underline cursor-pointer text-white flex-1"
