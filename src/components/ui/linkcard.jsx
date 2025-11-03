@@ -141,7 +141,7 @@ const LinkCard = ({ url, fetchUrls, pageLoaded }) => {
                     </span>
                 )}
                 <span className={`text-left ${isDarkMode ? 'text-white' : 'text-black'}`}>
-                    Link rút gọn: <a href={`/${url.id}/${url.short_url}`} target='_blank' className='text-blue-400 hover:underline cursor-pointer truncate max-w-full'>{`https://trimurlz.me/${url.id}/${url.short_url}`.length > 60 ? `https://trimurlz.me/${url.id}/${url.short_url}`.slice(0, 60) + '...' : `https://trimurlz.me/${url.id}/${url.short_url}`}</a>
+                    Link rút gọn: <a href={`/${url.short_url}`} target='_blank' className='text-blue-400 hover:underline cursor-pointer truncate max-w-full'>{`https://trimurlz.me/${url.short_url}`.length > 60 ? `https://trimurlz.me/${url.short_url}`.slice(0, 60) + '...' : `https://trimurlz.me/${url.short_url}`}</a>
                 </span>
                 <span className={`text-left ${isDarkMode ? 'text-white' : 'text-black'}`}>Link gốc: <a href={url.original_url} target='_blank' className='text-blue-400 hover:underline cursor-pointer truncate max-w-full'>{url.original_url.length > 60 ? url.original_url.slice(0, 60) + '...' : url.original_url}</a></span>
                 <span className={`flex items-end font-extralight text sm flex-1 text-left ${isDarkMode ? 'text-white' : 'text-black'}`}>Thời điểm tạo: {new Date(url?.created_at).toLocaleString()}</span>
@@ -188,7 +188,7 @@ const LinkCard = ({ url, fetchUrls, pageLoaded }) => {
                     </Button>
                     <div className="relative">
                         <Button onClick={() => {
-                            navigator.clipboard.writeText(`https://trimurlz.me/${url?.id}/${url?.short_url}`);
+                            navigator.clipboard.writeText(`https://trimurlz.me/${url?.short_url}`);
                             setShowCopiedPopup(true);
                             setTimeout(() => setShowCopiedPopup(false), 2000);
                         }}
