@@ -213,20 +213,20 @@ export async function updateUrl(options, updates, newProfilePic = null) {
     throw new Error("Không có quyền cập nhật đường link này");
   }
 
-  // Check for duplicate title
+  // Check for duplicate title (per user)
   if (updates.title && updates.title !== currentUrl.title) {
     const titleExists = await checkTitleExists(updates.title, user_id);
     if (titleExists) {
-      throw new Error("Tiêu đề này đã được sử dụng. Vui lòng chọn tiêu đề khác.");
+      throw new Error("Tiêu đề này đã được bạn sử dụng. Vui lòng chọn tiêu đề khác.");
     }
   }
 
-  // Check for duplicate customUrl
+  // Check for duplicate customUrl (per user)
   if (updates.customUrl !== undefined && updates.customUrl !== currentUrl.custom_url) {
     if (updates.customUrl) {
       const customExists = await checkCustomUrlExists(updates.customUrl, user_id);
       if (customExists) {
-        throw new Error("Link tùy chỉnh này đã được sử dụng. Vui lòng chọn tên khác.");
+        throw new Error("Link tuỳ chỉnh này đã được bạn sử dụng. Vui lòng chọn tên khác.");
       }
     }
   }
