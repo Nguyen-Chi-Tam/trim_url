@@ -15,7 +15,7 @@ import Error from "@/components/error"
 import { useState, useEffect } from 'react'
 import * as Yup from 'yup'
 import useFetch from '@/hooks/use-fetch'
-import { login } from '@/db/apiauth'
+import { login, loginWithGoogle } from '@/db/apiauth'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { UrlState } from '@/context.jsx'
 
@@ -38,6 +38,7 @@ const Login = () => {
         }));
     }
     const { data, error, loading, fn: fnLogin } = useFetch(login, formData);
+    const { error: gErr, loading: gLoading, fn: fnGoogle } = useFetch(loginWithGoogle);
     const {fetchuser} =  UrlState();
     useEffect(() => {
         if (error === null && data) {
@@ -64,12 +65,18 @@ const Login = () => {
             setErrors(newErrors);
         }
     }
+    const handleGoogle = async () => {
+        const redirectPath = `/auth${longLink ? `?createNew=${encodeURIComponent(longLink)}` : ''}`;
+        // This will redirect away; no need to await fetchuser here.
+        await fnGoogle({ redirectPath });
+    }
     return (
         <Card>
             <CardHeader>
                 <CardTitle>Đăng nhập</CardTitle>
                 <CardDescription>Chào mừng bạn cũ quay lại TrimURL</CardDescription>
                 {error && <Error message={error.message} />}
+                {gErr && <Error message={gErr.message} />}
             </CardHeader>
             <CardContent className="space-y-2">
                 <div className="space-y-1">
@@ -86,6 +93,9 @@ const Login = () => {
             <CardFooter className="flex flex-col space-y-2">
                 <Button className="w-full" onClick={handleLogin}>
                     {loading ? <BeatLoader size={10} color="#5500ffff" /> : "Đăng nhập"}
+                </Button>
+                <Button variant="outline" className="w-full" onClick={handleGoogle} disabled={gLoading}>
+                    {gLoading ? <BeatLoader size={10} color="#5500ffff" /> : "Đăng nhập với Google"}
                 </Button>
                 <Button variant="link" onClick={() => navigate('/forgot-password')}>
                     Quên mật khẩu?
