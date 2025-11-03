@@ -57,11 +57,15 @@ const router=createBrowserRouter([
         element: <RequireAuth><Admin/></RequireAuth>
       },
       {
-        path: '/bio/:id',
+        path: '/bio/:url',
         element: <Bio/>
       },
       {
-        path: '/:id/:shortUrl',
+        path: '/:id/:customUrl',
+        element: <Redirect/>
+      },
+      {
+        path: '/:shortUrl',
         element: <Redirect/>
       }
     ]
