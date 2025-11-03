@@ -158,7 +158,11 @@ export async function checkTitleExistsBio(title, user_id) {
 export async function updateBio(options, updates, newProfilePic = null, newBackgroundPic = null) {
   const { id, user_id } = options;
   // First, get the current bio to check user_id and get current data
-  const { data: currentBio, error: fetchError } = await supabase.from("bio_page").select("user_id, title, profile_pic, background").eq("id", id).single();
+  const { data: currentBio, error: fetchError } = await supabase
+    .from("bio_page")
+    .select("user_id, title, url, profile_pic, background")
+    .eq("id", id)
+    .single();
   if (fetchError) {
     console.error(fetchError.message);
     throw new Error("Không thể tìm thấy trang bio để cập nhật");
@@ -167,20 +171,32 @@ export async function updateBio(options, updates, newProfilePic = null, newBackg
     throw new Error("Không có quyền cập nhật trang bio này");
   }
 
-  // Check for duplicate title
-  if (updates.title && updates.title !== currentBio.title) {
-    const titleExists = await checkTitleExistsBio(updates.title, user_id);
-    if (titleExists) {
-      throw new Error("Tiêu đề này đã được sử dụng. Vui lòng chọn tiêu đề khác.");
-    }
-  }
-
   // Prepare updates
   const dbUpdates = { ...updates };
 
-  // If title is updated, generate new url
-  if (dbUpdates.title) {
-    dbUpdates.url = dbUpdates.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  // If title is updated, generate new url with preserved or new 6-char suffix (case-sensitive)
+  if (dbUpdates.title && dbUpdates.title !== currentBio.title) {
+    // Ensure title is unique per user
+    const exists = await checkTitleExistsBio(dbUpdates.title, user_id);
+    if (exists) {
+      throw new Error("Tiêu đề này đã được bạn sử dụng. Vui lòng chọn tiêu đề khác.");
+    }
+
+    const baseSlug = dbUpdates.title
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '') || 'bio';
+
+    // Attempt to preserve existing suffix if present
+    const suffixMatch = /-([A-Za-z0-9]{6})$/.exec(currentBio.url || '');
+    let suffix = suffixMatch ? suffixMatch[1] : '';
+    if (!suffix) {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      suffix = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    }
+    dbUpdates.url = `${baseSlug}-${suffix}`;
   }
 
   // Handle profile pic removal
@@ -257,12 +273,17 @@ export async function updateBio(options, updates, newProfilePic = null, newBackg
     dbUpdates.background = `${supabaseUrl}/storage/v1/object/public/bio_background/${fileName}`;
   }
 
-  const { data, error } = await supabase.from("bio_page").update(dbUpdates).eq("id", id);
+  const { data, error } = await supabase
+    .from("bio_page")
+    .update(dbUpdates)
+    .eq("id", id)
+    .select("id, title, url, description, profile_pic, background");
   if (error) {
     console.error(error.message);
     throw new Error("Không thể cập nhật trang bio");
   }
-  return data;
+  // Return the single updated row
+  return Array.isArray(data) ? data[0] : data;
 }
 
 // Add a URL to a bio page
@@ -292,20 +313,47 @@ export async function addBioUrl(bioId, urlId) {
 // Create a new bio page
 export async function createBioPage({ title, profilePic, user_id }) {
   try {
-    // Check if title already exists for this user
-    const titleExists = await checkTitleExistsBio(title, user_id);
-    if (titleExists) {
-      throw new Error("Tiêu đề này đã được sử dụng. Vui lòng chọn tiêu đề khác.");
+    // Ensure title is unique per user
+    const exists = await checkTitleExistsBio(title, user_id);
+    if (exists) {
+      throw new Error("Tiêu đề này đã được bạn sử dụng. Vui lòng chọn tiêu đề khác.");
     }
 
-    // Generate url from title (slugify)
-    const url = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    // Generate base slug from title
+    const baseSlug = title
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '') || 'bio';
+
+    // Helper to create a 6-char random string (case-sensitive)
+    const rand6 = () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    };
+
+    // Try to ensure URL uniqueness by checking existing records
+    let url = '';
+    for (let i = 0; i < 5; i++) {
+      const candidate = `${baseSlug}-${rand6()}`;
+      const { count, error: countError } = await supabase
+        .from('bio_page')
+        .select('id', { count: 'exact', head: true })
+        .eq('url', candidate);
+      if (!countError && (!count || count === 0)) {
+        url = candidate;
+        break;
+      }
+    }
+    // Fallback if uniqueness check above failed repeatedly
+    if (!url) url = `${baseSlug}-${Date.now().toString(36).slice(-6)}`;
 
     let profile_pic_url = null;
 
     if (profilePic) {
       // Generate a unique file name for the profile picture
-      const fileName = `profile-${url}.png`;
+  const fileName = `profile-${url}.png`;
 
       console.log("Uploading profile picture file:", fileName, profilePic);
       const { error: storageError } = await supabase.storage
