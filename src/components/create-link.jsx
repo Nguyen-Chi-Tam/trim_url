@@ -26,6 +26,10 @@ export function CreateLink(){
   const longLink = searchParams.get("createNew");
   const ref = useRef()
   const [open, setOpen] = useState(false);
+  // Number pickers for expiration time (HH:MM:SS)
+  const [expHours, setExpHours] = useState(0)
+  const [expMinutes, setExpMinutes] = useState(10)
+  const [expSeconds, setExpSeconds] = useState(0)
 
   useEffect(() => {
     if (longLink) {
@@ -45,6 +49,10 @@ export function CreateLink(){
       setShowCaptcha(false);
       setCaptchaToken(null);
       setErrors({});
+      // reset pickers to default 00:10:00
+      setExpHours(0);
+      setExpMinutes(10);
+      setExpSeconds(0);
     }
   }, [open]);
 
@@ -63,6 +71,16 @@ export function CreateLink(){
     })
   }
 
+  const handleTimePartChange = (part) => (e) => {
+    const raw = parseInt(e.target.value, 10)
+    const value = clamp(raw, part === 'h' ? 0 : 0, part === 'h' ? 23 : 59)
+    let h = expHours, m = expMinutes, s = expSeconds
+    if (part === 'h') { setExpHours(value); h = value }
+    if (part === 'm') { setExpMinutes(value); m = value }
+    if (part === 's') { setExpSeconds(value); s = value }
+    setFormValues({ ...formValues, expirationTime: toTimeString(h, m, s) })
+  }
+
   const [errors, setErrors] = useState({})
   const [formValues, setFormValues] = useState({
     title: "",
@@ -71,6 +89,20 @@ export function CreateLink(){
     isTemporary: false,
     expirationTime: "00:10:00" // default 10 minutes
   })
+
+  // Helpers for time pickers and synchronization
+  const clamp = (v, min, max) => Math.min(Math.max(Number.isFinite(v) ? v : 0, min), max)
+  const pad2 = (n) => String(n).padStart(2, '0')
+  const toTimeString = (h, m, s) => `${pad2(h)}:${pad2(m)}:${pad2(s)}`
+
+  // Keep pickers in sync with stored hh:mm:ss
+  useEffect(() => {
+    if (!formValues?.expirationTime) return
+    const [h = 0, m = 0, s = 0] = formValues.expirationTime.split(':').map((n) => parseInt(n, 10) || 0)
+    setExpHours(clamp(h, 0, 23))
+    setExpMinutes(clamp(m, 0, 59))
+    setExpSeconds(clamp(s, 0, 59))
+  }, [formValues.expirationTime, formValues.isTemporary])
 
   const {
     loading, error, data, fn: fnCreateUrl
@@ -102,6 +134,10 @@ export function CreateLink(){
         }
         if (!/^\d{2}:\d{2}:\d{2}$/.test(formValues.expirationTime)) {
           throw new Error("Định dạng phải là hh:mm:ss");
+        }
+        const [h, m, s] = formValues.expirationTime.split(':').map(Number)
+        if ((h + m + s) === 0) {
+          throw new Error("Thời gian hết hạn phải lớn hơn 0 giây");
         }
       }
 
@@ -227,12 +263,40 @@ export function CreateLink(){
         {formValues.isTemporary && (
           <>
             <h2 className='font-bold mt-2'>Thời gian hết hạn (hh:mm:ss):</h2>
-            <Input
-              id="expirationTime"
-              placeholder="00:10:00"
-              value={formValues.expirationTime}
-              onChange={handleChange}
-            />
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                id="exp-hours"
+                min={0}
+                max={23}
+                step={1}
+                value={expHours}
+                onChange={handleTimePartChange('h')}
+                className="w-20 text-center"
+              />
+              <span>:</span>
+              <Input
+                type="number"
+                id="exp-minutes"
+                min={0}
+                max={59}
+                step={1}
+                value={expMinutes}
+                onChange={handleTimePartChange('m')}
+                className="w-20 text-center"
+              />
+              <span>:</span>
+              <Input
+                type="number"
+                id="exp-seconds"
+                min={0}
+                max={59}
+                step={1}
+                value={expSeconds}
+                onChange={handleTimePartChange('s')}
+                className="w-20 text-center"
+              />
+            </div>
             {errors.expirationTime && <ErrorMessage message={errors.expirationTime} />}
           </>
         )}
