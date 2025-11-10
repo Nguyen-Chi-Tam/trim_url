@@ -39,6 +39,29 @@ const Login = () => {
     }
     const { data, error, loading, fn: fnLogin } = useFetch(login, formData);
     const { error: gErr, loading: gLoading, fn: fnGoogle } = useFetch(loginWithGoogle);
+    
+    // Map raw auth error messages to friendlier, actionable Vietnamese messages
+    const mapAuthErrorMessage = (raw) => {
+        if (!raw) return null;
+        const msg = (raw.message || raw.toString() || '').trim();
+        const lower = msg.toLowerCase();
+        if (lower.includes('invalid login credentials') || lower.includes('invalid email or password')) {
+            return 'Email hoặc mật khẩu không đúng. Vui lòng kiểm tra lại, hoặc nhấn “Quên mật khẩu?” nếu bạn cần đặt lại.';
+        }
+        if (lower.includes('email not confirmed') || lower.includes('confirm') && lower.includes('email')) {
+            return 'Email của bạn chưa được xác nhận. Hãy kiểm tra hộp thư (kể cả Spam) để tìm email kích hoạt, rồi thử đăng nhập lại.';
+        }
+        if (lower.includes('too many') || lower.includes('rate limit') || lower.includes('rate-limited')) {
+            return 'Bạn đã thử quá nhiều lần trong thời gian ngắn. Vui lòng đợi một chút rồi đăng nhập lại.';
+        }
+        if (lower.includes('fetch') || lower.includes('network') || lower.includes('timeout')) {
+            return 'Không thể kết nối tới máy chủ. Kiểm tra kết nối mạng hoặc thử lại sau.';
+        }
+        if (lower.includes('refresh token') && lower.includes('expired')) {
+            return 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục.';
+        }
+        return `Không đăng nhập được: ${msg}`;
+    };
     const {fetchuser} =  UrlState();
     useEffect(() => {
         if (error === null && data) {
@@ -75,8 +98,8 @@ const Login = () => {
             <CardHeader>
                 <CardTitle>Đăng nhập</CardTitle>
                 <CardDescription>Chào mừng bạn cũ quay lại TrimURL</CardDescription>
-                {error && <Error message={error.message} />}
-                {gErr && <Error message={gErr.message} />}
+                {error && <Error message={mapAuthErrorMessage(error)} />}
+                {gErr && <Error message={mapAuthErrorMessage(gErr)} />}
             </CardHeader>
             <CardContent className="space-y-2">
                 <div className="space-y-1">
