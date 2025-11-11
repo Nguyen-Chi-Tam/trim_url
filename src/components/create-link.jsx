@@ -16,7 +16,7 @@ import * as Yup from 'yup';
 import QRCode from 'react-qrcode-logo';
 import useFetch from '@/hooks/use-fetch';
 import { BeatLoader } from 'react-spinners'; // Added import
-import { createUrl, checkCustomUrlExists, checkTitleExists } from '@/db/apiUrl';
+import { createUrl, checkCustomUrlExists, checkTitleExists, attachQrCode } from '@/db/apiUrl';
 import ReCAPTCHA from 'react-google-recaptcha';
 
 export function CreateLink(){
@@ -24,7 +24,9 @@ export function CreateLink(){
   const navigate = useNavigate()
   let [searchParams, setSearchParams] = useSearchParams()
   const longLink = searchParams.get("createNew");
-  const ref = useRef()
+  // Hidden QR generator for short URL post-creation
+  const genRef = useRef()
+  const [qrToGenerate, setQrToGenerate] = useState(null)
   const [open, setOpen] = useState(false);
   // Number pickers for expiration time (HH:MM:SS)
   const [expHours, setExpHours] = useState(0)
@@ -49,6 +51,7 @@ export function CreateLink(){
       setShowCaptcha(false);
       setCaptchaToken(null);
       setErrors({});
+      setQrToGenerate(null);
       // reset pickers to default 00:10:00
       setExpHours(0);
       setExpMinutes(10);
@@ -111,17 +114,36 @@ export function CreateLink(){
   const [showCaptcha, setShowCaptcha] = useState(false)
   const [captchaToken, setCaptchaToken] = useState(null)
 
-  useEffect(() => {
-    if (error === null && data) {
-      navigate(`/link/${data[0].id}`);
-    }
-  }, [error, data])
+  // We'll navigate after QR attach completes, so skip navigating here.
 
   const handleCaptchaVerify = (token) => {
     setCaptchaToken(token)
     // Proceed with form submission after CAPTCHA verification
     createNewLink()
   }
+
+  // helper: generate a QR blob for a given value using hidden canvas
+  const generateQrBlob = (value) => new Promise((resolve, reject) => {
+    setQrToGenerate(value)
+    let attempts = 0
+    const maxAttempts = 40 // ~40 frames
+    const check = () => {
+      const canvas = genRef.current?.canvasRef?.current
+      if (canvas) {
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob)
+          else reject(new Error("Failed to generate QR code"))
+        })
+        return
+      }
+      if (attempts++ < maxAttempts) {
+        requestAnimationFrame(check)
+      } else {
+        reject(new Error("QR canvas not ready"))
+      }
+    }
+    requestAnimationFrame(check)
+  })
 
   const createNewLink = async () => {
     setErrors({});
@@ -165,19 +187,19 @@ export function CreateLink(){
         expirationTime = now.toISOString();
       }
 
-      const canvas = ref.current.canvasRef.current;
-      if (!canvas) {
-        throw new Error("Failed to generate QR code");
-      }
-      const blob = await new Promise((resolve, reject) => canvas.toBlob((blob) => {
-        if (blob) resolve(blob);
-        else reject(new Error("Failed to generate QR code"));
-      }));
+      // Step 1: Create URL record first (without QR)
+      const created = await fnCreateUrl(null, expirationTime, captchaToken);
+      const rec = created?.[0];
+      if (!rec) throw new Error("Không nhận được dữ liệu đường link vừa tạo");
 
-      // Wrap blob as a File with filename and type for Supabase storage upload
+      // Step 2: Generate QR from short URL and attach
+      const shortFull = `https://trimurlz.me/${rec.short_url}`;
+      const blob = await generateQrBlob(shortFull);
       const file = new File([blob], "qrcode.png", { type: "image/png" });
+      await attachQrCode({ id: rec.id, short_url: rec.short_url }, file);
 
-      await fnCreateUrl(file, expirationTime, captchaToken);
+      // Step 3: Go to detail page
+      navigate(`/link/${rec.id}`);
     } catch (e) {
       const newErrors = {};
 
@@ -221,10 +243,15 @@ export function CreateLink(){
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          {formValues.longUrl && <QRCode value={formValues.longUrl} size={250} ref={ref} />}
           <DialogTitle className='text-2xl text-cyan-400 font-bold'>Tạo đường link mới nhú tại đây</DialogTitle>
           <DialogTitle>👇</DialogTitle>
         </DialogHeader>
+        {/* Hidden QR generator for short URL (used post-creation) */}
+        {qrToGenerate && (
+          <div style={{ position: 'absolute', left: '-9999px', top: 0 }} aria-hidden="true">
+            <QRCode value={qrToGenerate} size={300} ref={genRef} />
+          </div>
+        )}
         <h2 className='font-bold '>Tiêu đề:</h2>
         <Input id="title" placeholder="Đặt cho nó một cái tên dễ nhớ"
           value={formValues.title}
