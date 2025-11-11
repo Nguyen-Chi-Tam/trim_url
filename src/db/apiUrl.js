@@ -60,7 +60,8 @@ async function checkIfShortUrlExists(short_url) {
   return data && data.length > 0;
 }
 
-export async function createUrl(options, qrcode, expirationTime = null, captchaToken = null) {
+// Step 1: Create URL record first (qr_code may be null initially)
+export async function createUrl(options, qrcode = null, expirationTime = null, captchaToken = null) {
   const { title, longUrl, customUrl, user_id, isTemporary } = options;
   if (captchaToken) {
     console.log("CAPTCHA token received:", captchaToken);
@@ -70,19 +71,21 @@ export async function createUrl(options, qrcode, expirationTime = null, captchaT
   do {
     short_url = Math.random().toString(36).substr(2, 6);
   } while (await checkIfShortUrlExists(short_url));
-  const fileName = `qr-${short_url}`;
 
-  console.log("Uploading QR code file:", fileName, qrcode);
-  const { error: storageError } = await supabase.storage
-    .from("qrs")
-    .upload(fileName, qrcode);
-
-  if (storageError) {
-    console.error("Storage upload error:", storageError);
-    throw new Error(storageError.message);
+  // If a QR file is provided (legacy path), upload immediately; otherwise leave null
+  let qr_code = null;
+  if (qrcode) {
+    const fileName = `qr-${short_url}`;
+    console.log("Uploading QR code file (legacy immediate upload):", fileName, qrcode);
+    const { error: storageError } = await supabase.storage
+      .from("qrs")
+      .upload(fileName, qrcode);
+    if (storageError) {
+      console.error("Storage upload error:", storageError);
+      throw new Error(storageError.message);
+    }
+    qr_code = `${supabaseUrl}/storage/v1/object/public/qrs/${fileName}`;
   }
-
-  const qr_code = `${supabaseUrl}/storage/v1/object/public/qrs/${fileName}`;
 
   const { data, error } = await supabase
     .from("urls")
@@ -93,7 +96,7 @@ export async function createUrl(options, qrcode, expirationTime = null, captchaT
         original_url: longUrl,
         custom_url: customUrl || null,
         short_url,
-        qr_code,
+        qr_code, // may be null (new flow) or populated (legacy)
         expiration_time: expirationTime || null,
         is_temporary: isTemporary || false,
       },
@@ -105,6 +108,34 @@ export async function createUrl(options, qrcode, expirationTime = null, captchaT
     throw new Error("Không thể tạo đường link");
   }
 
+  return data;
+}
+
+// Step 2: After short_url is known on client, generate QR and attach
+export async function attachQrCode(options, qrcodeFile) {
+  const { id, short_url } = options;
+  if (!id || !short_url) throw new Error("Thiếu id hoặc short_url để gắn QR");
+  if (!qrcodeFile) throw new Error("Không có file QR để tải lên");
+
+  const fileName = `qr-${short_url}`;
+  // Remove old file if exists (idempotent update)
+  try {
+    await supabase.storage.from("qrs").remove([fileName]);
+  } catch (e) {
+    // ignore delete errors
+  }
+
+  const { error: storageError } = await supabase.storage.from("qrs").upload(fileName, qrcodeFile);
+  if (storageError) {
+    console.error(storageError.message);
+    throw new Error("Không thể tải lên mã QR");
+  }
+  const qr_code = `${supabaseUrl}/storage/v1/object/public/qrs/${fileName}`;
+  const { data, error } = await supabase.from("urls").update({ qr_code }).eq("id", id).select();
+  if (error) {
+    console.error(error.message);
+    throw new Error("Không thể cập nhật mã QR cho đường link");
+  }
   return data;
 }
 
