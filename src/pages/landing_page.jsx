@@ -56,23 +56,23 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen landing-background text-gray-900 dark:text-gray-100">
       <main style={mainStyle}>
-<div className={`border border-gray-300 dark:border-gray-700 rounded-lg p-4 col-span-2 flex flex-col-reverse md:flex-row items-center justify-center gap-6 mt-30 ${bgClass}`}>
+<div className={`border border-gray-300 dark:border-white rounded-lg p-4 col-span-2 flex flex-col-reverse md:flex-row items-center justify-center gap-6 mt-30 ${bgClass}`}>
           <div className={`rounded-lg p-4 col-span-2 items-center gap-6`}>
             <div className="flex-1 w-full ">
               <Hero />
             </div>
           </div>
         </div>
-        <div className={`border border-gray-300 dark:border-gray-700 rounded-lg p-4 ${window.innerWidth <= 1024 ? 'col-span-2' : 'md:col-span-1'} ${bgClass}`}>
+        <div className={`border border-gray-300 dark:border-white rounded-lg p-4 ${window.innerWidth <= 1024 ? 'col-span-2' : 'md:col-span-1'} ${bgClass}`}>
           <Features />
         </div>
-        <div className={`border border-gray-300 dark:border-gray-700 rounded-lg p-4 ${window.innerWidth <= 1024 ? 'col-span-2' : 'md:col-span-1'} ${bgClass}`}>
+        <div className={`border border-gray-300 dark:border-white rounded-lg p-4 ${window.innerWidth <= 1024 ? 'col-span-2' : 'md:col-span-1'} ${bgClass}`}>
           <Showcase />
         </div>
-        <div className={`border border-gray-300 dark:border-gray-700 rounded-lg p-4 ${window.innerWidth <= 1024 ? 'col-span-2' : 'md:col-span-1'} ${bgClass}`}>
+        <div className={`border border-gray-300 dark:border-white rounded-lg p-4 ${window.innerWidth <= 1024 ? 'col-span-2' : 'md:col-span-1'} ${bgClass}`}>
           <Testimonials />
         </div>
-        <div className={`border border-gray-300 dark:border-gray-700 rounded-lg p-4 ${window.innerWidth <= 1024 ? 'col-span-2' : 'md:col-span-1'} ${bgClass}`}>
+        <div className={`border border-gray-300 dark:border-white rounded-lg p-4 ${window.innerWidth <= 1024 ? 'col-span-2' : 'md:col-span-1'} ${bgClass}`}>
           <FAQ />
         </div>
       </main>
