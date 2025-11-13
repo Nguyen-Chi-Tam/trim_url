@@ -22,3 +22,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment variables (Vite/Node/Workers)
+.env
+.env.*
+!.env.example
+
+# Vite mode-specific (in case not covered above)
+.env.development
+.env.production
+.env.test
+
+# Cloudflare Workers local secrets
+.dev.vars
