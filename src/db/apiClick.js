@@ -22,7 +22,13 @@ export const storeClicks = async ({id, originalUrl}) => {
     console.log('Starting click recording for URL ID:', id);
 
     const res = parser.getResult();
-    const device = res.type || "desktop"; // Default to desktop if type is not detected
+    let device = "other";
+    const osName = (res.os.name || "").toLowerCase();
+    if (["windows", "mac os", "linux"].includes(osName)) {
+      device = "desktop";
+    } else if (["android", "ios"].includes(osName)) {
+      device = "mobile";
+    }
     console.log('Device detected:', device);
 
     const response = await fetch("https://ipinfo.io/json");
@@ -63,4 +69,3 @@ export async function getClicksForUrl(url_id) {
   }
   return data
 }
-
