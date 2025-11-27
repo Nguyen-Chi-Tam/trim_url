@@ -25,7 +25,7 @@ import {
 
 const Link = () => {
   const { user } = UrlState()
-  const { id } = useParams()
+  const { shortUrl } = useParams()
   const navigate = useNavigate()
   const [remainingTime, setRemainingTime] = useState('')
   const [isEditing, setIsEditing] = useState(false);
@@ -38,21 +38,27 @@ const Link = () => {
     data: url,
     fn,
     error,
-  } = useFetch(getUrl, { id, user_id: user?.id });
+  } = useFetch(getUrl, { short_url: shortUrl, user_id: user?.id });
 
-  const {
-    loading: loadingStats,
-    data: stats,
-    fn: fnStats,
-  } = useFetch(getClicksForUrl, id);
+  const [stats, setStats] = useState([]);
+  const [loadingStats, setLoadingStats] = useState(false);
 
-  const { loading: loadingDelete, fn: fnDelete } = useFetch(deleteUrl, id);
-  const { loading: loadingUpdate, fn: fnUpdate } = useFetch(updateUrl, {id, user_id: user.id});
+  const { loading: loadingDelete, fn: fnDelete } = useFetch(deleteUrl, shortUrl);
+  const { loading: loadingUpdate, fn: fnUpdate } = useFetch(updateUrl, {short_url: shortUrl, user_id: user.id});
 
   useEffect(() => {
-    fn()
-    fnStats()
-  }, [])
+    fn();
+  }, []);
+
+  useEffect(() => {
+    if (url && url.id) {
+      setLoadingStats(true);
+      getClicksForUrl(url.id)
+        .then((data) => setStats(data))
+        .catch(() => setStats([]))
+        .finally(() => setLoadingStats(false));
+    }
+  }, [url]);
 
   useEffect(() => {
     if (url?.expiration_time) {
