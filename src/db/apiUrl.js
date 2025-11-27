@@ -203,15 +203,22 @@ export async function getLongUrlByIdAndCustom({ id, customUrl }) {
   return data;
 }
 
-export async function getUrl({id,user_id}) {
-  const { data, error } = await supabase.from("urls").select("*")
-  .eq("id", id).eq("user_id", user_id)
-  .single()
+export async function getUrl({id, short_url, user_id}) {
+  let query = supabase.from("urls").select("*");
+  if (id) {
+    query = query.eq("id", id);
+  } else if (short_url) {
+    query = query.eq("short_url", short_url);
+  }
+  if (user_id) {
+    query = query.eq("user_id", user_id);
+  }
+  const { data, error } = await query.single();
   if (error) {
     console.error(error.message);
     throw new Error("Không tìm thấy đường link");
   }
-  return data
+  return data;
 }
 
 export async function checkCustomUrlExists(customUrl, user_id) {
