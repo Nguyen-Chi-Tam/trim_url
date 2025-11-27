@@ -1,5 +1,8 @@
 import supabase, { supabaseUrl } from './supabase';
+<<<<<<< HEAD
 import { compressImage } from '@/lib/utils';
+=======
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
 
 // Fetch a single bio page by id
 export async function fetchBio(id) {
@@ -222,6 +225,7 @@ export async function updateBio(options, updates, newProfilePic = null, newBackg
       }
     }
 
+<<<<<<< HEAD
     // Compress profile image to ~20KB before upload
     let toUploadProfile = newProfilePic;
     try {
@@ -231,12 +235,18 @@ export async function updateBio(options, updates, newProfilePic = null, newBackg
       toUploadProfile = newProfilePic;
     }
 
+=======
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
     // Upload new profile pic with unique filename
     const uniqueSuffix = Date.now();
     const fileName = `profile-${dbUpdates.url || currentBio.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}-${uniqueSuffix}.png`;
     const { error: storageError } = await supabase.storage
       .from("bio_profile_pic")
+<<<<<<< HEAD
       .upload(fileName, toUploadProfile);
+=======
+      .upload(fileName, newProfilePic);
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
 
     if (storageError) {
       console.error("Storage upload error:", storageError);
@@ -268,6 +278,7 @@ export async function updateBio(options, updates, newProfilePic = null, newBackg
       }
     }
 
+<<<<<<< HEAD
     // Compress background image to ~50KB before upload
     let toUploadBg = newBackgroundPic;
     try {
@@ -277,12 +288,18 @@ export async function updateBio(options, updates, newProfilePic = null, newBackg
       toUploadBg = newBackgroundPic;
     }
 
+=======
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
     // Upload new background pic with unique filename
     const uniqueSuffix = Date.now();
     const fileName = `background-${dbUpdates.url || currentBio.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}-${uniqueSuffix}.png`;
     const { error: storageError } = await supabase.storage
       .from("bio_background")
+<<<<<<< HEAD
       .upload(fileName, toUploadBg);
+=======
+      .upload(fileName, newBackgroundPic);
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
 
     if (storageError) {
       console.error("Storage upload error:", storageError);
@@ -371,6 +388,7 @@ export async function createBioPage({ title, profilePic, user_id }) {
     let profile_pic_url = null;
 
     if (profilePic) {
+<<<<<<< HEAD
       // Compress profile image to ~20KB before upload
       let toUpload = profilePic;
       try {
@@ -387,6 +405,15 @@ export async function createBioPage({ title, profilePic, user_id }) {
       const { error: storageError } = await supabase.storage
         .from("bio_profile_pic")
         .upload(fileName, toUpload);
+=======
+      // Generate a unique file name for the profile picture
+  const fileName = `profile-${url}.png`;
+
+      console.log("Uploading profile picture file:", fileName, profilePic);
+      const { error: storageError } = await supabase.storage
+        .from("bio_profile_pic")
+        .upload(fileName, profilePic);
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
 
       if (storageError) {
         console.error("Storage upload error:", storageError);

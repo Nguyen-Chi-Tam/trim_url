@@ -1,5 +1,8 @@
 import supabase, { supabaseUrl } from './supabase';
+<<<<<<< HEAD
 import { compressImage } from '@/lib/utils';
+=======
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
 
 export async function login({ email, password }) {
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -39,6 +42,7 @@ export async function getCurrentUser() {
 export async function signup({ name, email, password, profile_pic }) {
     let profilePicUrl = null;
     if (profile_pic) {
+<<<<<<< HEAD
         // Compress user profile picture to ~5KB to save storage/bandwidth
         let toUpload = profile_pic;
         try {
@@ -50,6 +54,10 @@ export async function signup({ name, email, password, profile_pic }) {
 
         const fileName = `dp-${name.split(" ").join("_")}-${Math.random()}`;
         const { error: storageErr } = await supabase.storage.from("profile_pic").upload(fileName, toUpload);
+=======
+        const fileName = `dp-${name.split(" ").join("_")}-${Math.random()}`;
+        const { error: storageErr } = await supabase.storage.from("profile_pic").upload(fileName, profile_pic);
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
         if (storageErr) throw new Error(storageErr.message);
         profilePicUrl = `${supabaseUrl}/storage/v1/object/public/profile_pic/${fileName}`;
     } else {

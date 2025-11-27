@@ -7,7 +7,10 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { UrlState } from '@/context.jsx';
 import { updateUser } from '@/db/apiauth';
 import supabase, { supabaseUrl } from '@/db/supabase';
+<<<<<<< HEAD
 import { compressImage } from '@/lib/utils';
+=======
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
 import { BarLoader } from 'react-spinners';
 import Error from '@/components/error';
 
@@ -58,6 +61,7 @@ const Profile = () => {
           }
         }
 
+<<<<<<< HEAD
         // 2) Compress and upload new image
         let toUpload = selectedFile;
         try {
@@ -72,6 +76,14 @@ const Profile = () => {
         const safeBase = (user?.id || user?.user_metadata?.name || 'user').toString().replace(/\s+/g, '_');
         const fileName = `dp-${safeBase}-${Date.now()}.${guessedExt}`;
         const { error: storageErr } = await supabase.storage.from('profile_pic').upload(fileName, toUpload);
+=======
+        // 2) Upload new image
+        // Keep file extension if possible
+        const guessedExt = selectedFile.name?.split('.')?.pop() || selectedFile.type?.split('/')?.pop() || 'jpg';
+        const safeBase = (user?.id || user?.user_metadata?.name || 'user').toString().replace(/\s+/g, '_');
+        const fileName = `dp-${safeBase}-${Date.now()}.${guessedExt}`;
+        const { error: storageErr } = await supabase.storage.from('profile_pic').upload(fileName, selectedFile);
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
 
         if (storageErr) {
           // If upload fails and we already deleted old one, fall back to default avatar and continue

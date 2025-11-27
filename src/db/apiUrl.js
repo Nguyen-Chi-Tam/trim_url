@@ -1,5 +1,8 @@
 import supabase, { supabaseUrl } from './supabase';
+<<<<<<< HEAD
 import { compressImage } from '@/lib/utils';
+=======
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
 
 export async function getUrls(user_id) {
   const { data, error } = await supabase.from("urls").select("*")
@@ -27,11 +30,16 @@ export async function deleteUrl(id) {
   }
 
   // Fetch the URL record to get the QR code file name
+<<<<<<< HEAD
   const { data: urlData, error: fetchError } = await supabase.from("urls").select("short_url, qr_code").eq("id", id).single();
+=======
+  const { data: urlData, error: fetchError } = await supabase.from("urls").select("short_url").eq("id", id).single();
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
   if (fetchError) {
     console.error(fetchError.message);
     throw new Error("Không thể tìm thấy đường link để xoá");
   }
+<<<<<<< HEAD
   // If there is a qr_code URL stored, extract the filename and remove it
   if (urlData && urlData.qr_code) {
     try {
@@ -46,6 +54,17 @@ export async function deleteUrl(id) {
     } catch (e) {
       console.error('Error removing previous QR file during deleteUrl:', e);
     }
+=======
+
+  // Extract the file name from short_url
+  const fileName = `qr-${urlData.short_url}`;
+
+  // Delete the QR code file from the "qrs" storage bucket
+  const { error: storageError } = await supabase.storage.from("qrs").remove([fileName]);
+  if (storageError) {
+    console.error(storageError.message);
+    throw new Error("Không thể xoá mã QR khỏi bộ nhớ");
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
   }
 
   const { data, error } = await supabase.from("urls").delete()
@@ -81,6 +100,7 @@ export async function createUrl(options, qrcode = null, expirationTime = null, c
   // If a QR file is provided (legacy path), upload immediately; otherwise leave null
   let qr_code = null;
   if (qrcode) {
+<<<<<<< HEAD
     // Compress QR to target ~10KB before upload and choose extension from blob type
     let toUpload = qrcode;
     try {
@@ -95,6 +115,13 @@ export async function createUrl(options, qrcode = null, expirationTime = null, c
     const { error: storageError } = await supabase.storage
       .from("qrs")
       .upload(fileName, toUpload);
+=======
+    const fileName = `qr-${short_url}`;
+    console.log("Uploading QR code file (legacy immediate upload):", fileName, qrcode);
+    const { error: storageError } = await supabase.storage
+      .from("qrs")
+      .upload(fileName, qrcode);
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
     if (storageError) {
       console.error("Storage upload error:", storageError);
       throw new Error(storageError.message);
@@ -131,6 +158,7 @@ export async function attachQrCode(options, qrcodeFile) {
   const { id, short_url } = options;
   if (!id || !short_url) throw new Error("Thiếu id hoặc short_url để gắn QR");
   if (!qrcodeFile) throw new Error("Không có file QR để tải lên");
+<<<<<<< HEAD
   // Fetch current record to determine if previous QR exists (so we can remove the exact file)
   try {
     const { data: current, error: fetchErr } = await supabase.from('urls').select('qr_code').eq('id', id).single();
@@ -162,6 +190,21 @@ export async function attachQrCode(options, qrcodeFile) {
   if (storageError) {
     console.error(storageError.message);
     throw new Error('Không thể tải lên mã QR');
+=======
+
+  const fileName = `qr-${short_url}`;
+  // Remove old file if exists (idempotent update)
+  try {
+    await supabase.storage.from("qrs").remove([fileName]);
+  } catch (e) {
+    // ignore delete errors
+  }
+
+  const { error: storageError } = await supabase.storage.from("qrs").upload(fileName, qrcodeFile);
+  if (storageError) {
+    console.error(storageError.message);
+    throw new Error("Không thể tải lên mã QR");
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
   }
   const qr_code = `${supabaseUrl}/storage/v1/object/public/qrs/${fileName}`;
   const { data, error } = await supabase.from("urls").update({ qr_code }).eq("id", id).select();
@@ -327,6 +370,7 @@ export async function updateUrl(options, updates, newProfilePic = null) {
       }
     }
 
+<<<<<<< HEAD
     // Compress profile image to ~20KB before upload
     let toUpload = newProfilePic;
     try {
@@ -336,11 +380,17 @@ export async function updateUrl(options, updates, newProfilePic = null) {
       toUpload = newProfilePic;
     }
 
+=======
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
     // Upload new profile pic
     const fileName = `profile-${id}.png`;
     const { error: storageError } = await supabase.storage
       .from("url_profile_pic")
+<<<<<<< HEAD
       .upload(fileName, toUpload);
+=======
+      .upload(fileName, newProfilePic);
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
 
     if (storageError) {
       console.error("Storage upload error:", storageError);
@@ -363,6 +413,7 @@ export async function updateUrl(options, updates, newProfilePic = null) {
   }
   return data;
 }
+<<<<<<< HEAD
 
 // Remove QR code file and clear `qr_code` column for a URL
 export async function deleteQrCode({ id } = {}) {
@@ -395,3 +446,5 @@ export async function deleteQrCode({ id } = {}) {
 
   return data;
 }
+=======
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4

@@ -4,6 +4,7 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
+<<<<<<< HEAD
 
 // Compress an image File/Blob to be under `maxBytes` if possible.
 // Returns a Blob (of type image/jpeg or original type) suitable for upload.
@@ -46,3 +47,5 @@ export async function compressImage(file, maxBytes, maxWidth = 1280) {
   const fallbackBlob = await new Promise((res) => canvas.toBlob(res, 'image/jpeg', Math.max(minQuality, quality)));
   return fallbackBlob || file;
 }
+=======
+>>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
