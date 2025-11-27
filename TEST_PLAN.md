@@ -91,8 +91,6 @@ Thực hiện thủ công trên trình duyệt.
 - [ ] Truy cập một link rút gọn (`/{shortUrl}`), được chuyển hướng chính xác đến URL gốc.
 - [ ] Kiểm tra trong Dashboard, số lượt click của link đó tăng lên.
 
----
-
 ## 3. Kiểm thử End-to-End (E2E)
 
 Mô phỏng một luồng hoàn chỉnh của người dùng.

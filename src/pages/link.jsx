@@ -3,19 +3,12 @@ import { getClicksForUrl } from '@/db/apiClick'
 import { deleteUrl, getUrl, updateUrl } from '@/db/apiUrl'
 import useFetch from '@/hooks/use-fetch'
 import { LinkIcon, Edit, Check, X } from 'lucide-react'
-<<<<<<< HEAD
 import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { BarLoader, BeatLoader } from 'react-spinners'
 import { Button } from '@/components/ui/button'
 import QRCode from 'react-qrcode-logo';
 import { attachQrCode, deleteQrCode } from '@/db/apiUrl';
-=======
-import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { BarLoader, BeatLoader } from 'react-spinners'
-import { Button } from '@/components/ui/button'
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
 import { Input } from '@/components/ui/input'
 import { Copy, Download, Trash } from 'lucide-react'
 import Location from '@/components/ui/location-stats'
@@ -42,13 +35,10 @@ const Link = () => {
   const [newCustomUrl, setNewCustomUrl] = useState('');
   const [newProfilePic, setNewProfilePic] = useState(null);
   const [showCopiedPopup, setShowCopiedPopup] = useState(false);
-<<<<<<< HEAD
   const genRef = useRef();
   const [qrToGenerate, setQrToGenerate] = useState(null);
   const [creatingQr, setCreatingQr] = useState(false);
   const [deletingQrState, setDeletingQrState] = useState(false);
-=======
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
   const {
     loading,
     data: url,
@@ -59,13 +49,8 @@ const Link = () => {
   const [stats, setStats] = useState([]);
   const [loadingStats, setLoadingStats] = useState(false);
 
-<<<<<<< HEAD
   const { loading: loadingDelete, fn: fnDelete } = useFetch(deleteUrl, url?.id);
   const { loading: loadingUpdate, fn: fnUpdate } = useFetch(updateUrl, { id: url?.id, user_id: user?.id });
-=======
-  const { loading: loadingDelete, fn: fnDelete } = useFetch(deleteUrl, shortUrl);
-  const { loading: loadingUpdate, fn: fnUpdate } = useFetch(updateUrl, {short_url: shortUrl, user_id: user.id});
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
 
   useEffect(() => {
     fn();
@@ -119,7 +104,6 @@ const Link = () => {
     document.body.removeChild(anchor)
   }
 
-<<<<<<< HEAD
   // helper: generate a QR blob for a given value using hidden canvas (same approach as create-link)
   const generateQrBlob = (value) => new Promise((resolve, reject) => {
     setQrToGenerate(value)
@@ -174,8 +158,6 @@ const Link = () => {
     }
   }
 
-=======
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -326,7 +308,6 @@ const Link = () => {
                 <Button variant="ghost" onClick={downloadImage}>
                   <Download />
                 </Button>
-<<<<<<< HEAD
                 {!url?.qr_code ? (
                   <Button variant="ghost" onClick={handleCreateQr} disabled={creatingQr}>
                     {creatingQr ? <BeatLoader size={5} color='#5500ffff' /> : 'Tạo QR'}
@@ -336,8 +317,6 @@ const Link = () => {
                     {deletingQrState ? <BeatLoader size={5} color='#5500ffff' /> : 'Xoá QR'}
                   </Button>
                 )}
-=======
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
                 <Button variant="ghost" onClick={() => fnDelete().then(() => navigate('/dashboard'))}>
                   {loadingDelete ? <BeatLoader size={5} color='#5500ffff' /> : <Trash />}
                 </Button>
@@ -345,7 +324,6 @@ const Link = () => {
             )}
           </div>
             {url && (
-<<<<<<< HEAD
               <>
                 {qrToGenerate && (
                   <div style={{ position: 'absolute', left: '-9999px', top: 0 }} aria-hidden="true">
@@ -356,11 +334,6 @@ const Link = () => {
                   className="self-center object-contain ring ring-blue-500 self-start"
                   alt="Mã QR" />
               </>
-=======
-              <img src={url.qr_code ? url.qr_code : '/public/qr_not_found.png'}
-                className="self-center object-contain ring ring-blue-500 self-start"
-                alt="Mã QR" />
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
             )}
         </div>
         <Card className='xl:w-3/5'>
