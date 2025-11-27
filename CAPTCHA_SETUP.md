@@ -73,4 +73,4 @@ The CAPTCHA system:
 
 - If CAPTCHA doesn't appear, check that `react-google-recaptcha` is installed
 - If verification fails, check your reCAPTCHA keys and domain settings
-- For development on localhost, make sure to add `localhost` to your reCAPTCHA allowed domains
+- For development on localhost, make sure to add `localhost` to your reCAPTCHA allowed domains.
