@@ -11,6 +11,7 @@ A modern URL shortener application built with React, Vite, and Supabase for auth
 - ⚡ Fast development with Vite
 - 🗄️ Supabase backend for data persistence
 - 📖 API Documentation with Swagger
+- 💾 Tebi.io Storage bucket with 20x more storage
 
 ## Prerequisites
 
