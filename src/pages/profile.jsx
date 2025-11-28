@@ -45,16 +45,16 @@ const Profile = () => {
         const isDefault = currentUrl.endsWith('default_user.png');
         let deletedOld = false;
         if (currentUrl.startsWith(publicPrefix) && !isDefault) {
-          const currentPath = currentUrl.slice(publicPrefix.length); // path relative to bucket
+          const fileName = currentUrl.split('/').pop(); // get filename from URL
           try {
-            // Call backend API to delete old profile pic
+            // Call backend API to delete old profile pic using correct endpoint
             await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
               method: 'DELETE',
               headers: {
                 'Content-Type': 'application/json',
                 ...(localStorage.getItem('token') ? { 'Authorization': `Bearer ${localStorage.getItem('token')}` } : {})
               },
-              body: JSON.stringify({ bucket, key: currentPath })
+              body: JSON.stringify({ bucket, key: fileName })
             });
             deletedOld = true;
           } catch (delEx) {
