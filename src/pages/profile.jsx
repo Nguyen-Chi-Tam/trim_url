@@ -47,8 +47,8 @@ const Profile = () => {
         if (currentUrl.startsWith(publicPrefix) && !isDefault) {
           const fileName = currentUrl.split('/').pop(); // get filename from URL
           try {
-            // Call backend API to delete old profile pic using correct endpoint
-            await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
+            // Call backend API to delete old profile pic using correct endpoint for production (Cloudflare Worker)
+            await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/delete-qr`, {
               method: 'DELETE',
               headers: {
                 'Content-Type': 'application/json',
