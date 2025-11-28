@@ -329,7 +329,7 @@ export async function updateUrl(options, updates, newProfilePic = null) {
   if (dbUpdates.profile_pic === null && currentUrl.profile_pic) {
     const oldFileName = currentUrl.profile_pic.split('/').pop();
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
+      const response = await fetch(`https://url-shortener-backend.fegeltronics.workers.dev/api/delete-qr`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -353,7 +353,7 @@ export async function updateUrl(options, updates, newProfilePic = null) {
     if (currentUrl.profile_pic) {
       const oldFileName = currentUrl.profile_pic.split('/').pop();
       try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
+        const response = await fetch(`https://url-shortener-backend.fegeltronics.workers.dev/api/delete-qr`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -443,7 +443,7 @@ export async function deleteQrCode({ id } = {}) {
       try {
         const bucket = 'qrs';
         // Call backend API to delete QR file from Tebi.io
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
+        const response = await fetch(`https://url-shortener-backend.fegeltronics.workers.dev/api/delete-qr`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',

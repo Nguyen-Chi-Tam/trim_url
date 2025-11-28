@@ -248,7 +248,7 @@ const BioDetails = ({ bio }) => {
       if (bio.background) {
         const oldFileName = bio.background.split('/').pop();
         // Call backend API to delete from Tebi.io
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
+        const response = await fetch(`https://url-shortener-backend.fegeltronics.workers.dev/api/delete-qr`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',

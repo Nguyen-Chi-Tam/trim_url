@@ -117,7 +117,7 @@ export async function deleteBio(id) {
   if (bioData.profile_pic) {
     const fileName = bioData.profile_pic.split('/').pop();
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
+      const response = await fetch(`https://url-shortener-backend.fegeltronics.workers.dev/api/delete-qr`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -139,7 +139,7 @@ export async function deleteBio(id) {
   if (bioData.background) {
     const fileName = bioData.background.split('/').pop();
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
+      const response = await fetch(`https://url-shortener-backend.fegeltronics.workers.dev/api/delete-qr`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -223,7 +223,7 @@ export async function updateBio(options, updates, newProfilePic = null, newBackg
     if (currentBio.profile_pic) {
       const oldFileName = currentBio.profile_pic.split('/').pop();
       try {
-        await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
+        await fetch(`https://url-shortener-backend.fegeltronics.workers.dev/api/delete-qr`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -277,7 +277,7 @@ export async function updateBio(options, updates, newProfilePic = null, newBackg
     if (currentBio.background) {
       const oldFileName = currentBio.background.split('/').pop();
       try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
+        const response = await fetch(`https://url-shortener-backend.fegeltronics.workers.dev/api/delete-qr`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
