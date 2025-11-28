@@ -2,11 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-<<<<<<< HEAD
 import {Copy, Download, Trash, Edit, Check, X} from 'lucide-react'
-=======
-import { Copy, Download, Trash, Edit, Check, X } from 'lucide-react'
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
 import useFetch from '@/hooks/use-fetch';
 import { deleteUrl, updateUrl } from '@/db/apiUrl';
 import { BeatLoader } from 'react-spinners';
@@ -14,13 +10,8 @@ import { UrlState } from '@/context.jsx';
 
 const LinkCard = ({ url, fetchUrls, pageLoaded }) => {
     const { user } = UrlState();
-<<<<<<< HEAD
     const {loading: loadingDelete, fn:fnDelete}=useFetch(deleteUrl, url?.id)
     const {loading: loadingUpdate, fn:fnUpdate}=useFetch(updateUrl, {id: url?.id, user_id: user.id})
-=======
-    const { loading: loadingDelete, fn: fnDelete } = useFetch(deleteUrl, url?.id)
-    const { loading: loadingUpdate, fn: fnUpdate } = useFetch(updateUrl, { id: url?.id, user_id: user.id })
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
 
     const [timeLeft, setTimeLeft] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
@@ -69,7 +60,6 @@ const LinkCard = ({ url, fetchUrls, pageLoaded }) => {
         return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     };
 
-<<<<<<< HEAD
     const downloadImage=()=>{
         const imageUrl=url?.qr_code
         const fileName=url?.title
@@ -77,15 +67,6 @@ const LinkCard = ({ url, fetchUrls, pageLoaded }) => {
         const anchor=document.createElement("a")
         anchor.href=imageUrl
         anchor.download=fileName
-=======
-    const downloadImage = () => {
-        const imageUrl = url?.qr_code
-        const fileName = url?.title
-
-        const anchor = document.createElement("a")
-        anchor.href = imageUrl
-        anchor.download = fileName
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
 
         document.body.appendChild(anchor)
         anchor.click();
@@ -99,12 +80,8 @@ const LinkCard = ({ url, fetchUrls, pageLoaded }) => {
         }
     };
     return (
-<<<<<<< HEAD
     <div className={`flex flex-col md:flex-row gap-5 border border-gray-600 dark:border-gray-500 p-4 rounded-lg mt-2 mb-2 ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-200/50'}${showCard ? ' animate-fade-up' : ' opacity-0'}`} style={{transition: 'opacity 0.5s'}}>
-=======
-        <div className={`flex flex-col md:flex-row gap-5 border border-gray-600 dark:border-gray-500 p-4 rounded-lg mt-2 mb-2 ${isDarkMode ? 'bg-gray-900/50' : 'bg-gray-200/50'}${showCard ? ' animate-fade-up' : ' opacity-0'}`} style={{ transition: 'opacity 0.5s' }}>
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
-            <img src={url?.profile_pic ? url.profile_pic : (url?.qr_code ? url.qr_code : '/public/qr_not_found.png')}
+            <img src={url?.profile_pic ? url.profile_pic : (url?.qr_code ? url.qr_code : '/qr_not_found.png')}
                 className="h-25 w-25 object-cover ring ring-blue-500 self-start aspect-square"
                 alt={url?.profile_pic ? "Profile Picture" : "QR Code"} />
             <div className="flex flex-col flex-1 max-w-full overflow-hidden">
@@ -154,15 +131,9 @@ const LinkCard = ({ url, fetchUrls, pageLoaded }) => {
                         </div>
                     </>
                 ) : (
-<<<<<<< HEAD
                                         <Link to={`/link/${url?.short_url}`} className={`text-left line-clamp-2 text-2xl font-bold hover:underline cursor-pointer ${isDarkMode ? 'text-white' : 'text-black'}`}>
                                             {url?.title}
                                         </Link>
-=======
-                    <Link to={`/link/${url?.short_url}`} className={`text-left line-clamp-2 text-2xl font-bold hover:underline cursor-pointer ${isDarkMode ? 'text-white' : 'text-black'}`}>
-                        {url?.title}
-                    </Link>
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
                 )}
                 {url?.custom_url && (
                     <span className={`text-left ${isDarkMode ? 'text-white' : 'text-black'}`}>
@@ -182,7 +153,6 @@ const LinkCard = ({ url, fetchUrls, pageLoaded }) => {
                 )}
             </div>
 
-<<<<<<< HEAD
         <div className='flex gap-2'>
             {isEditing ? (
                 <>
@@ -239,64 +209,6 @@ const LinkCard = ({ url, fetchUrls, pageLoaded }) => {
                 </>
             )}
         </div>
-=======
-            <div className='flex gap-2'>
-                {isEditing ? (
-                    <>
-                        <Button
-                            onClick={() => {
-                                fnUpdate({ title: newTitle }, newProfilePic).then(() => {
-                                    setIsEditing(false);
-                                    setNewProfilePic(null);
-                                    fetchUrls();
-                                });
-                            }}
-                            disabled={loadingUpdate}
-                            className={isDarkMode ? '' : 'bg-black text-white'}
-                        >
-                            {loadingUpdate ? <BeatLoader size={5} color='#5500ffff' /> : <Check />}
-                        </Button>
-                        <Button
-                            variant="outline"
-                            onClick={() => {
-                                setIsEditing(false);
-                                setNewTitle(url?.title);
-                                setNewProfilePic(null);
-                            }}
-                            className={isDarkMode ? '' : 'bg-black text-white border-black'}
-                        >
-                            <X />
-                        </Button>
-                    </>
-                ) : (
-                    <>
-                        <Button onClick={() => setIsEditing(true)} className={isDarkMode ? '' : 'bg-black text-white'}>
-                            <Edit />
-                        </Button>
-                        <div className="relative">
-                            <Button onClick={() => {
-                                navigator.clipboard.writeText(`https://trimurlz.me/${url?.short_url}`);
-                                setShowCopiedPopup(true);
-                                setTimeout(() => setShowCopiedPopup(false), 2000);
-                            }}
-                                className={isDarkMode ? '' : 'bg-black text-white'}
-                            >
-                                <Copy />
-                            </Button>
-                            <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm px-2 py-1 rounded shadow-lg z-[60] transition-opacity duration-500 ease-in-out ${showCopiedPopup ? 'opacity-100' : 'opacity-0'}`}>
-                                Đã sao chép
-                            </div>
-                        </div>
-                        <Button onClick={downloadImage} className={isDarkMode ? '' : 'bg-black text-white'}>
-                            <Download />
-                        </Button>
-                        <Button onClick={() => fnDelete().then(() => fetchUrls())} className={isDarkMode ? '' : 'bg-black text-white'}>
-                            {loadingDelete ? <BeatLoader size={5} color='#5500ffff' /> : <Trash />}
-                        </Button>
-                    </>
-                )}
-            </div>
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
         </div>
     )
 }

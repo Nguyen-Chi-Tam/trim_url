@@ -38,21 +38,25 @@ const Profile = () => {
       if (selectedFile) {
         let usedFallback = false;
         let postAlertMessage = 'Cập nhật thông tin thành công';
-        // 1) Delete current avatar in storage if it's not the default image and is within our bucket
+        // 1) Delete current avatar in Tebi if it's not the default image and is within our bucket
         const currentUrl = user?.user_metadata?.profile_pic || '';
-        const publicPrefix = `${supabaseUrl}/storage/v1/object/public/profile_pic/`;
+        const bucket = 'profilepic';
+        const publicPrefix = `https://s3.tebi.io/${bucket}/`;
         const isDefault = currentUrl.endsWith('default_user.png');
         let deletedOld = false;
         if (currentUrl.startsWith(publicPrefix) && !isDefault) {
           const currentPath = currentUrl.slice(publicPrefix.length); // path relative to bucket
           try {
-            const { error: delErr } = await supabase.storage.from('profile_pic').remove([currentPath]);
-            if (delErr) {
-              // Non-fatal: continue to upload new pic
-              console.warn('Failed to delete old avatar:', delErr.message);
-            } else {
-              deletedOld = true;
-            }
+            // Call backend API to delete old profile pic
+            await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(localStorage.getItem('token') ? { 'Authorization': `Bearer ${localStorage.getItem('token')}` } : {})
+              },
+              body: JSON.stringify({ bucket, key: currentPath })
+            });
+            deletedOld = true;
           } catch (delEx) {
             console.warn('Error deleting old avatar:', delEx?.message || delEx);
           }
@@ -67,29 +71,59 @@ const Profile = () => {
           toUpload = selectedFile;
         }
 
+        // Convert to Uint8Array for AWS SDK
+        if (!(toUpload instanceof Uint8Array)) {
+          if (toUpload instanceof Blob || toUpload instanceof File) {
+            const arrayBuffer = await toUpload.arrayBuffer();
+            toUpload = new Uint8Array(arrayBuffer);
+          } else {
+            toUpload = new Uint8Array(toUpload);
+          }
+        }
+
         // Keep file extension if possible (prefer blob type)
         const guessedExt = toUpload.type?.split('/')?.pop() || selectedFile.name?.split('.')?.pop() || 'jpg';
         const safeBase = (user?.id || user?.user_metadata?.name || 'user').toString().replace(/\s+/g, '_');
         const fileName = `dp-${safeBase}-${Date.now()}.${guessedExt}`;
-        const { error: storageErr } = await supabase.storage.from('profile_pic').upload(fileName, toUpload);
+        let uploadedUrl = null;
+        let uploadError = null;
+        try {
+          const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
+          const s3 = new S3Client({
+            region: 'us-east-1',
+            endpoint: 'https://s3.tebi.io',
+            credentials: {
+              accessKeyId: import.meta.env.VITE_TEBI_ACCESS_KEY,
+              secretAccessKey: import.meta.env.VITE_TEBI_SECRET_KEY,
+            },
+          });
+          await s3.send(new PutObjectCommand({
+            Bucket: bucket,
+            Key: fileName,
+            Body: toUpload,
+            ContentType: selectedFile.type || 'image/png',
+          }));
+          uploadedUrl = `https://s3.tebi.io/${bucket}/${fileName}`;
+        } catch (err) {
+          uploadError = err;
+        }
 
-        if (storageErr) {
+        if (uploadError) {
           // If upload fails and we already deleted old one, fall back to default avatar and continue
           if (deletedOld) {
-            const fallbackUrl = `${supabaseUrl}/storage/v1/object/public/profile_pic/default_user.png`;
+            const fallbackUrl = `https://s3.tebi.io/${bucket}/default_user.png`;
             updates.data = { ...updates.data, profile_pic: fallbackUrl };
             hasChanges = true;
             usedFallback = true;
             postAlertMessage = 'Ảnh mới tải lên thất bại, hệ thống đã đặt lại ảnh mặc định. Các thông tin khác đã được cập nhật.';
           } else {
-            throw new Error(storageErr.message);
+            throw new Error(uploadError.message);
           }
         }
 
         // 3) Build new public URL and update metadata if upload succeeded
-        if (!storageErr) {
-          const profilePicUrl = `${supabaseUrl}/storage/v1/object/public/profile_pic/${fileName}`;
-          updates.data = { ...updates.data, profile_pic: profilePicUrl };
+        if (!uploadError) {
+          updates.data = { ...updates.data, profile_pic: uploadedUrl };
           hasChanges = true;
         }
         setSelectedFile(null); // Clear after upload

@@ -1,8 +1,6 @@
 import supabase, { supabaseUrl } from './supabase';
-<<<<<<< HEAD
+import { uploadFile, deleteFile, getPublicUrl } from '@/lib/tebiActions';
 import { compressImage } from '@/lib/utils';
-=======
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
 
 export async function getUrls(user_id) {
   const { data, error } = await supabase.from("urls").select("*")
@@ -30,16 +28,11 @@ export async function deleteUrl(id) {
   }
 
   // Fetch the URL record to get the QR code file name
-<<<<<<< HEAD
   const { data: urlData, error: fetchError } = await supabase.from("urls").select("short_url, qr_code").eq("id", id).single();
-=======
-  const { data: urlData, error: fetchError } = await supabase.from("urls").select("short_url").eq("id", id).single();
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
   if (fetchError) {
     console.error(fetchError.message);
     throw new Error("Không thể tìm thấy đường link để xoá");
   }
-<<<<<<< HEAD
   // If there is a qr_code URL stored, extract the filename and remove it
   if (urlData && urlData.qr_code) {
     try {
@@ -54,17 +47,6 @@ export async function deleteUrl(id) {
     } catch (e) {
       console.error('Error removing previous QR file during deleteUrl:', e);
     }
-=======
-
-  // Extract the file name from short_url
-  const fileName = `qr-${urlData.short_url}`;
-
-  // Delete the QR code file from the "qrs" storage bucket
-  const { error: storageError } = await supabase.storage.from("qrs").remove([fileName]);
-  if (storageError) {
-    console.error(storageError.message);
-    throw new Error("Không thể xoá mã QR khỏi bộ nhớ");
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
   }
 
   const { data, error } = await supabase.from("urls").delete()
@@ -100,7 +82,6 @@ export async function createUrl(options, qrcode = null, expirationTime = null, c
   // If a QR file is provided (legacy path), upload immediately; otherwise leave null
   let qr_code = null;
   if (qrcode) {
-<<<<<<< HEAD
     // Compress QR to target ~10KB before upload and choose extension from blob type
     let toUpload = qrcode;
     try {
@@ -115,13 +96,6 @@ export async function createUrl(options, qrcode = null, expirationTime = null, c
     const { error: storageError } = await supabase.storage
       .from("qrs")
       .upload(fileName, toUpload);
-=======
-    const fileName = `qr-${short_url}`;
-    console.log("Uploading QR code file (legacy immediate upload):", fileName, qrcode);
-    const { error: storageError } = await supabase.storage
-      .from("qrs")
-      .upload(fileName, qrcode);
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
     if (storageError) {
       console.error("Storage upload error:", storageError);
       throw new Error(storageError.message);
@@ -158,7 +132,6 @@ export async function attachQrCode(options, qrcodeFile) {
   const { id, short_url } = options;
   if (!id || !short_url) throw new Error("Thiếu id hoặc short_url để gắn QR");
   if (!qrcodeFile) throw new Error("Không có file QR để tải lên");
-<<<<<<< HEAD
   // Fetch current record to determine if previous QR exists (so we can remove the exact file)
   try {
     const { data: current, error: fetchErr } = await supabase.from('urls').select('qr_code').eq('id', id).single();
@@ -166,7 +139,9 @@ export async function attachQrCode(options, qrcodeFile) {
       const prevFile = current.qr_code.split('/').pop();
       if (prevFile) {
         try {
-          await supabase.storage.from('qrs').remove([prevFile]);
+          // Remove previous QR from Tebi.io
+          const bucket = 'qrs';
+          await deleteFile(bucket, prevFile);
         } catch (e) {
           // ignore remove errors, proceed to upload new
         }
@@ -186,27 +161,29 @@ export async function attachQrCode(options, qrcodeFile) {
   }
   const ext = (toUpload && toUpload.type) ? (toUpload.type.split('/')[1] || 'png') : 'png';
   const fileName = `qr-${short_url}-${Date.now()}.${ext.replace('jpeg','jpg')}`;
-  const { error: storageError } = await supabase.storage.from('qrs').upload(fileName, toUpload);
-  if (storageError) {
-    console.error(storageError.message);
-    throw new Error('Không thể tải lên mã QR');
-=======
-
-  const fileName = `qr-${short_url}`;
-  // Remove old file if exists (idempotent update)
+  // Ensure toUpload is a Uint8Array for S3 upload compatibility
+  if (!(toUpload instanceof Uint8Array)) {
+    if (toUpload instanceof Blob || toUpload instanceof File) {
+      const arrayBuffer = await toUpload.arrayBuffer();
+      toUpload = new Uint8Array(arrayBuffer);
+    } else {
+      toUpload = new Uint8Array(toUpload);
+    }
+  }
+  // Upload to Tebi.io
+  const bucket = 'qrs';
+  let uploadError = null;
   try {
-    await supabase.storage.from("qrs").remove([fileName]);
-  } catch (e) {
-    // ignore delete errors
+    await uploadFile(bucket, toUpload, fileName);
+  } catch (err) {
+    uploadError = err;
   }
-
-  const { error: storageError } = await supabase.storage.from("qrs").upload(fileName, qrcodeFile);
-  if (storageError) {
-    console.error(storageError.message);
-    throw new Error("Không thể tải lên mã QR");
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
+  if (uploadError) {
+    console.error(uploadError.message);
+    throw new Error('Không thể tải lên mã QR');
   }
-  const qr_code = `${supabaseUrl}/storage/v1/object/public/qrs/${fileName}`;
+  // Get public URL from Tebi.io
+  const qr_code = getPublicUrl(bucket, fileName);
   const { data, error } = await supabase.from("urls").update({ qr_code }).eq("id", id).select();
   if (error) {
     console.error(error.message);
@@ -348,29 +325,50 @@ export async function updateUrl(options, updates, newProfilePic = null) {
   // Prepare updates
   const dbUpdates = { ...updates };
 
-  // Handle profile pic removal
+  // Handle profile pic removal (delete from Tebi.io via backend)
   if (dbUpdates.profile_pic === null && currentUrl.profile_pic) {
     const oldFileName = currentUrl.profile_pic.split('/').pop();
-    const { error: deleteError } = await supabase.storage.from("url_profile_pic").remove([oldFileName]);
-    if (deleteError) {
-      console.error(deleteError.message);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(localStorage.getItem('token') ? { 'Authorization': `Bearer ${localStorage.getItem('token')}` } : {})
+        },
+        body: JSON.stringify({ bucket: 'urlprofilepic', key: oldFileName })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Không thể xoá ảnh đại diện khỏi bộ nhớ');
+      }
+    } catch (e) {
+      console.error('Error removing URL profile pic from Tebi.io (backend):', e.message || e);
       // Don't throw, continue with update
     }
   }
 
-  // Handle profile pic update
+  // Handle profile pic update (upload to Tebi.io via AWS SDK)
   if (newProfilePic) {
     // Delete old profile pic if exists
     if (currentUrl.profile_pic) {
       const oldFileName = currentUrl.profile_pic.split('/').pop();
-      const { error: deleteError } = await supabase.storage.from("url_profile_pic").remove([oldFileName]);
-      if (deleteError) {
-        console.error(deleteError.message);
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(localStorage.getItem('token') ? { 'Authorization': `Bearer ${localStorage.getItem('token')}` } : {})
+          },
+          body: JSON.stringify({ bucket: 'urlprofilepic', key: oldFileName })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Không thể xoá ảnh đại diện khỏi bộ nhớ');
+        }
+      } catch (e) {
         // Don't throw, continue with update
       }
     }
-
-<<<<<<< HEAD
     // Compress profile image to ~20KB before upload
     let toUpload = newProfilePic;
     try {
@@ -379,25 +377,39 @@ export async function updateUrl(options, updates, newProfilePic = null) {
       console.warn('Profile pic compression failed, uploading original', e);
       toUpload = newProfilePic;
     }
-
-=======
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
-    // Upload new profile pic
-    const fileName = `profile-${id}.png`;
-    const { error: storageError } = await supabase.storage
-      .from("url_profile_pic")
-<<<<<<< HEAD
-      .upload(fileName, toUpload);
-=======
-      .upload(fileName, newProfilePic);
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
-
-    if (storageError) {
-      console.error("Storage upload error:", storageError);
-      throw new Error("Không thể tải lên ảnh đại diện mới");
+    // Convert to Uint8Array for AWS SDK
+    if (!(toUpload instanceof Uint8Array)) {
+      if (toUpload instanceof Blob || toUpload instanceof File) {
+        const arrayBuffer = await toUpload.arrayBuffer();
+        toUpload = new Uint8Array(arrayBuffer);
+      } else {
+        toUpload = new Uint8Array(toUpload);
+      }
     }
-
-    dbUpdates.profile_pic = `${supabaseUrl}/storage/v1/object/public/url_profile_pic/${fileName}`;
+    // Upload new profile pic to Tebi.io using AWS SDK
+    const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
+    const s3 = new S3Client({
+      region: 'us-east-1',
+      endpoint: 'https://s3.tebi.io',
+      credentials: {
+        accessKeyId: import.meta.env.VITE_TEBI_ACCESS_KEY,
+        secretAccessKey: import.meta.env.VITE_TEBI_SECRET_KEY,
+      },
+    });
+    const fileName = `profile-${id}-${Date.now()}.png`;
+    let uploadedUrl = null;
+    try {
+      await s3.send(new PutObjectCommand({
+        Bucket: 'urlprofilepic',
+        Key: fileName,
+        Body: toUpload,
+        ContentType: newProfilePic.type || 'image/png',
+      }));
+      uploadedUrl = `https://s3.tebi.io/urlprofilepic/${fileName}`;
+    } catch (err) {
+      throw new Error('Không thể tải lên ảnh đại diện mới: ' + err.message);
+    }
+    dbUpdates.profile_pic = uploadedUrl;
   }
 
   // Map customUrl to custom_url for database consistency
@@ -413,7 +425,6 @@ export async function updateUrl(options, updates, newProfilePic = null) {
   }
   return data;
 }
-<<<<<<< HEAD
 
 // Remove QR code file and clear `qr_code` column for a URL
 export async function deleteQrCode({ id } = {}) {
@@ -429,9 +440,24 @@ export async function deleteQrCode({ id } = {}) {
   if (current && current.qr_code) {
     const prevFile = current.qr_code.split('/').pop();
     if (prevFile) {
-      const { error: storageError } = await supabase.storage.from('qrs').remove([prevFile]);
-      if (storageError) {
-        console.error('Error removing QR file:', storageError.message || storageError);
+      try {
+        const bucket = 'qrs';
+        // Call backend API to delete QR file from Tebi.io
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            // Add authorization header if needed
+            ...(localStorage.getItem('token') ? { 'Authorization': `Bearer ${localStorage.getItem('token')}` } : {})
+          },
+          body: JSON.stringify({ bucket, key: prevFile })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Không thể xoá mã QR khỏi bộ nhớ');
+        }
+      } catch (e) {
+        console.error('Error removing QR file from Tebi.io (backend):', e.message || e);
         throw new Error('Không thể xoá mã QR khỏi bộ nhớ');
       }
     }
@@ -446,5 +472,3 @@ export async function deleteQrCode({ id } = {}) {
 
   return data;
 }
-=======
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4

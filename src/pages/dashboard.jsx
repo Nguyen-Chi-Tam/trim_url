@@ -148,10 +148,7 @@ const Dashboard = () => {
           <LinkCard key={i} url={url} fetchUrls={fnUrls} pageLoaded={pageLoaded}/>
         ))}
       </div>
-<<<<<<< HEAD
       {totalPages > 0 && (
-=======
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
       <div className='ml-10 mr-10 flex justify-center items-center gap-4 mb-5'>
         <Button
           variant="outline"
@@ -203,10 +200,7 @@ const Dashboard = () => {
           Cuối
         </Button>
       </div>
-<<<<<<< HEAD
       )}
-=======
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
     </div>
   )
 }

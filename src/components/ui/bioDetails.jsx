@@ -245,11 +245,30 @@ const BioDetails = ({ bio }) => {
     setIsLoading(true);
     setHasUnsavedChanges(true);
     try {
+      if (bio.background) {
+        const oldFileName = bio.background.split('/').pop();
+        // Call backend API to delete from Tebi.io
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(localStorage.getItem('token') ? { 'Authorization': `Bearer ${localStorage.getItem('token')}` } : {})
+          },
+          body: JSON.stringify({ bucket: 'biobackground', key: oldFileName })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Không thể xoá ảnh nền khỏi bộ nhớ');
+        }
+      }
       await updateBio({ id: bio.id, user_id: bio.user_id }, { background: null });
-      window.location.reload();
+      setBackgroundPicPreview(null);
+      bio.background = null;
+      setHasUnsavedChanges(false);
+      alert('Ảnh nền đã được xoá khỏi bộ nhớ và database (không refresh)');
     } catch (error) {
       console.error('Failed to remove background picture:', error);
-      alert('Không thể xoá ảnh nền');
+      alert(error.message || 'Không thể xoá ảnh nền');
     } finally {
       setIsLoading(false);
     }

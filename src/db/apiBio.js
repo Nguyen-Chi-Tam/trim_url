@@ -1,8 +1,6 @@
 import supabase, { supabaseUrl } from './supabase';
-<<<<<<< HEAD
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { compressImage } from '@/lib/utils';
-=======
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
 
 // Fetch a single bio page by id
 export async function fetchBio(id) {
@@ -115,29 +113,47 @@ export async function deleteBio(id) {
     throw new Error("Không thể xoá các liên kết của bio page");
   }
 
-  // If profile pic exists, delete it from storage
+  // If profile pic exists, delete it from Tebi.io via backend
   if (bioData.profile_pic) {
-    // Extract the file name from profile_pic URL
     const fileName = bioData.profile_pic.split('/').pop();
-
-    // Delete the profile pic file from the "bio_profile_pic" storage bucket
-    const { error: storageError } = await supabase.storage.from("bio_profile_pic").remove([fileName]);
-    if (storageError) {
-      console.error(storageError.message);
-      throw new Error("Không thể xoá ảnh đại diện khỏi bộ nhớ");
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(localStorage.getItem('token') ? { 'Authorization': `Bearer ${localStorage.getItem('token')}` } : {})
+        },
+        body: JSON.stringify({ bucket: 'bioprofilepic', key: fileName })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Không thể xoá ảnh đại diện khỏi bộ nhớ');
+      }
+    } catch (e) {
+      console.error('Error removing profile pic from Tebi.io (backend):', e.message || e);
+      throw new Error('Không thể xoá ảnh đại diện khỏi bộ nhớ');
     }
   }
 
-  // If background pic exists, delete it from storage
+  // If background pic exists, delete it from Tebi.io via backend
   if (bioData.background) {
-    // Extract the file name from background URL
     const fileName = bioData.background.split('/').pop();
-
-    // Delete the background pic file from the "bio_background" storage bucket
-    const { error: storageError } = await supabase.storage.from("bio_background").remove([fileName]);
-    if (storageError) {
-      console.error(storageError.message);
-      throw new Error("Không thể xoá ảnh nền khỏi bộ nhớ");
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(localStorage.getItem('token') ? { 'Authorization': `Bearer ${localStorage.getItem('token')}` } : {})
+        },
+        body: JSON.stringify({ bucket: 'biobackground', key: fileName })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Không thể xoá ảnh nền khỏi bộ nhớ');
+      }
+    } catch (e) {
+      console.error('Error removing background pic from Tebi.io (backend):', e.message || e);
+      throw new Error('Không thể xoá ảnh nền khỏi bộ nhớ');
     }
   }
 
@@ -185,14 +201,12 @@ export async function updateBio(options, updates, newProfilePic = null, newBackg
     if (exists) {
       throw new Error("Tiêu đề này đã được bạn sử dụng. Vui lòng chọn tiêu đề khác.");
     }
-
     const baseSlug = dbUpdates.title
       .toLowerCase()
       .replace(/\s+/g, '-')
       .replace(/[^a-z0-9-]/g, '')
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '') || 'bio';
-
     // Attempt to preserve existing suffix if present
     const suffixMatch = /-([A-Za-z0-9]{6})$/.exec(currentBio.url || '');
     let suffix = suffixMatch ? suffixMatch[1] : '';
@@ -203,29 +217,24 @@ export async function updateBio(options, updates, newProfilePic = null, newBackg
     dbUpdates.url = `${baseSlug}-${suffix}`;
   }
 
-  // Handle profile pic removal
-  if (dbUpdates.profile_pic === null && currentBio.profile_pic) {
-    const oldFileName = currentBio.profile_pic.split('/').pop();
-    const { error: deleteError } = await supabase.storage.from("bio_profile_pic").remove([oldFileName]);
-    if (deleteError) {
-      console.error(deleteError.message);
-      // Don't throw, continue with update
-    }
-  }
-
   // Handle profile pic update
   if (newProfilePic) {
     // Delete old profile pic if exists
     if (currentBio.profile_pic) {
       const oldFileName = currentBio.profile_pic.split('/').pop();
-      const { error: deleteError } = await supabase.storage.from("bio_profile_pic").remove([oldFileName]);
-      if (deleteError) {
-        console.error(deleteError.message);
+      try {
+        await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(localStorage.getItem('token') ? { 'Authorization': `Bearer ${localStorage.getItem('token')}` } : {})
+          },
+          body: JSON.stringify({ bucket: 'bioprofilepic', key: oldFileName })
+        });
+      } catch (e) {
         // Don't throw, continue with update
       }
     }
-
-<<<<<<< HEAD
     // Compress profile image to ~20KB before upload
     let toUploadProfile = newProfilePic;
     try {
@@ -234,36 +243,32 @@ export async function updateBio(options, updates, newProfilePic = null, newBackg
       console.warn('Profile pic compression failed, uploading original', e);
       toUploadProfile = newProfilePic;
     }
-
-=======
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
-    // Upload new profile pic with unique filename
+    // Upload new profile pic to Tebi.io directly from frontend using AWS SDK
     const uniqueSuffix = Date.now();
     const fileName = `profile-${dbUpdates.url || currentBio.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}-${uniqueSuffix}.png`;
-    const { error: storageError } = await supabase.storage
-      .from("bio_profile_pic")
-<<<<<<< HEAD
-      .upload(fileName, toUploadProfile);
-=======
-      .upload(fileName, newProfilePic);
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
-
-    if (storageError) {
-      console.error("Storage upload error:", storageError);
-      throw new Error("Không thể tải lên ảnh đại diện mới");
+    const s3 = new S3Client({
+      region: 'us-east-1',
+      endpoint: 'https://s3.tebi.io',
+      credentials: {
+        accessKeyId: import.meta.env.VITE_TEBI_ACCESS_KEY,
+        secretAccessKey: import.meta.env.VITE_TEBI_SECRET_KEY,
+      },
+    });
+    let uploadedUrl = null;
+    try {
+      const arrayBuffer = await toUploadProfile.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      await s3.send(new PutObjectCommand({
+        Bucket: 'bioprofilepic',
+        Key: fileName,
+        Body: uint8Array,
+        ContentType: toUploadProfile.type || 'image/png',
+      }));
+      uploadedUrl = `https://s3.tebi.io/bioprofilepic/${fileName}`;
+    } catch (err) {
+      throw new Error('Không thể tải lên ảnh đại diện mới: ' + err.message);
     }
-
-    dbUpdates.profile_pic = `${supabaseUrl}/storage/v1/object/public/bio_profile_pic/${fileName}`;
-  }
-
-  // Handle background pic removal
-  if (dbUpdates.background === null && currentBio.background) {
-    const oldFileName = currentBio.background.split('/').pop();
-    const { error: deleteError } = await supabase.storage.from("bio_background").remove([oldFileName]);
-    if (deleteError) {
-      console.error(deleteError.message);
-      // Don't throw, continue with update
-    }
+    dbUpdates.profile_pic = uploadedUrl;
   }
 
   // Handle background pic update
@@ -271,14 +276,24 @@ export async function updateBio(options, updates, newProfilePic = null, newBackg
     // Delete old background pic if exists
     if (currentBio.background) {
       const oldFileName = currentBio.background.split('/').pop();
-      const { error: deleteError } = await supabase.storage.from("bio_background").remove([oldFileName]);
-      if (deleteError) {
-        console.error(deleteError.message);
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/tebi/delete-qr`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(localStorage.getItem('token') ? { 'Authorization': `Bearer ${localStorage.getItem('token')}` } : {})
+          },
+          body: JSON.stringify({ bucket: 'biobackground', key: oldFileName })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Không thể xoá ảnh nền khỏi bộ nhớ');
+        }
+      } catch (e) {
+        console.error('Error removing background pic from Tebi.io (backend):', e.message || e);
         // Don't throw, continue with update
       }
     }
-
-<<<<<<< HEAD
     // Compress background image to ~50KB before upload
     let toUploadBg = newBackgroundPic;
     try {
@@ -287,39 +302,50 @@ export async function updateBio(options, updates, newProfilePic = null, newBackg
       console.warn('Background pic compression failed, uploading original', e);
       toUploadBg = newBackgroundPic;
     }
-
-=======
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
-    // Upload new background pic with unique filename
+    // Upload new background pic to Tebi.io directly from frontend using AWS SDK
     const uniqueSuffix = Date.now();
     const fileName = `background-${dbUpdates.url || currentBio.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}-${uniqueSuffix}.png`;
-    const { error: storageError } = await supabase.storage
-      .from("bio_background")
-<<<<<<< HEAD
-      .upload(fileName, toUploadBg);
-=======
-      .upload(fileName, newBackgroundPic);
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
-
-    if (storageError) {
-      console.error("Storage upload error:", storageError);
-      throw new Error("Không thể tải lên ảnh nền mới");
+    const s3 = new S3Client({
+      region: 'us-east-1',
+      endpoint: 'https://s3.tebi.io',
+      credentials: {
+        accessKeyId: import.meta.env.VITE_TEBI_ACCESS_KEY,
+        secretAccessKey: import.meta.env.VITE_TEBI_SECRET_KEY,
+      },
+    });
+    let uploadedUrl = null;
+    try {
+      const arrayBuffer = await toUploadBg.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      await s3.send(new PutObjectCommand({
+        Bucket: 'biobackground',
+        Key: fileName,
+        Body: uint8Array,
+        ContentType: toUploadBg.type || 'image/png',
+      }));
+      uploadedUrl = `https://s3.tebi.io/biobackground/${fileName}`;
+    } catch (err) {
+      throw new Error('Không thể tải lên ảnh nền mới: ' + err.message);
     }
-
-    dbUpdates.background = `${supabaseUrl}/storage/v1/object/public/bio_background/${fileName}`;
+    dbUpdates.background = uploadedUrl;
   }
 
-  const { data, error } = await supabase
-    .from("bio_page")
-    .update(dbUpdates)
-    .eq("id", id)
-    .select("id, title, url, description, profile_pic, background");
-  if (error) {
-    console.error(error.message);
-    throw new Error("Không thể cập nhật trang bio");
+  try {
+    const { data, error } = await supabase
+      .from("bio_page")
+      .update(dbUpdates)
+      .eq("id", id)
+      .select("id, title, url, description, profile_pic, background");
+    if (error) {
+      console.error(error.message);
+      throw new Error("Không thể cập nhật trang bio");
+    }
+    // Return the single updated row
+    return Array.isArray(data) ? data[0] : data;
+  } catch (error) {
+    console.error('Exception in updateBio:', error);
+    throw error;
   }
-  // Return the single updated row
-  return Array.isArray(data) ? data[0] : data;
 }
 
 // Add a URL to a bio page
@@ -388,7 +414,6 @@ export async function createBioPage({ title, profilePic, user_id }) {
     let profile_pic_url = null;
 
     if (profilePic) {
-<<<<<<< HEAD
       // Compress profile image to ~20KB before upload
       let toUpload = profilePic;
       try {
@@ -401,26 +426,30 @@ export async function createBioPage({ title, profilePic, user_id }) {
       // Generate a unique file name for the profile picture
       const fileName = `profile-${url}.png`;
 
-      console.log("Uploading profile picture file:", fileName);
-      const { error: storageError } = await supabase.storage
-        .from("bio_profile_pic")
-        .upload(fileName, toUpload);
-=======
-      // Generate a unique file name for the profile picture
-  const fileName = `profile-${url}.png`;
-
-      console.log("Uploading profile picture file:", fileName, profilePic);
-      const { error: storageError } = await supabase.storage
-        .from("bio_profile_pic")
-        .upload(fileName, profilePic);
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
-
-      if (storageError) {
-        console.error("Storage upload error:", storageError);
-        throw new Error("Không thể tải lên ảnh đại diện");
+      // Upload profile picture to Tebi.io directly from frontend using AWS SDK
+      const s3 = new S3Client({
+        region: 'us-east-1',
+        endpoint: 'https://s3.tebi.io',
+        credentials: {
+          accessKeyId: import.meta.env.VITE_TEBI_ACCESS_KEY,
+          secretAccessKey: import.meta.env.VITE_TEBI_SECRET_KEY,
+        },
+      });
+      let uploadedUrl = null;
+      try {
+        const arrayBuffer = await toUpload.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        await s3.send(new PutObjectCommand({
+          Bucket: 'bioprofilepic',
+          Key: fileName,
+          Body: uint8Array,
+          ContentType: toUpload.type || 'image/png',
+        }));
+        uploadedUrl = `https://s3.tebi.io/bioprofilepic/${fileName}`;
+      } catch (err) {
+        throw new Error('Không thể tải lên ảnh đại diện: ' + err.message);
       }
-
-      profile_pic_url = `${supabaseUrl}/storage/v1/object/public/bio_profile_pic/${fileName}`;
+      profile_pic_url = uploadedUrl;
     }
 
     const { data, error } = await supabase

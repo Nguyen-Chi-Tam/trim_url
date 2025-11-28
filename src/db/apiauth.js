@@ -1,8 +1,5 @@
 import supabase, { supabaseUrl } from './supabase';
-<<<<<<< HEAD
 import { compressImage } from '@/lib/utils';
-=======
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
 
 export async function login({ email, password }) {
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -42,7 +39,6 @@ export async function getCurrentUser() {
 export async function signup({ name, email, password, profile_pic }) {
     let profilePicUrl = null;
     if (profile_pic) {
-<<<<<<< HEAD
         // Compress user profile picture to ~5KB to save storage/bandwidth
         let toUpload = profile_pic;
         try {
@@ -51,17 +47,41 @@ export async function signup({ name, email, password, profile_pic }) {
             console.warn('Profile pic compression failed during signup, uploading original', e);
             toUpload = profile_pic;
         }
-
-        const fileName = `dp-${name.split(" ").join("_")}-${Math.random()}`;
-        const { error: storageErr } = await supabase.storage.from("profile_pic").upload(fileName, toUpload);
-=======
-        const fileName = `dp-${name.split(" ").join("_")}-${Math.random()}`;
-        const { error: storageErr } = await supabase.storage.from("profile_pic").upload(fileName, profile_pic);
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
-        if (storageErr) throw new Error(storageErr.message);
-        profilePicUrl = `${supabaseUrl}/storage/v1/object/public/profile_pic/${fileName}`;
+        // Convert to Uint8Array for AWS SDK
+        if (!(toUpload instanceof Uint8Array)) {
+            if (toUpload instanceof Blob || toUpload instanceof File) {
+                const arrayBuffer = await toUpload.arrayBuffer();
+                toUpload = new Uint8Array(arrayBuffer);
+            } else {
+                toUpload = new Uint8Array(toUpload);
+            }
+        }
+        // Upload to Tebi.io using AWS SDK
+        const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
+        const s3 = new S3Client({
+            region: 'us-east-1',
+            endpoint: 'https://s3.tebi.io',
+            credentials: {
+                accessKeyId: import.meta.env.VITE_TEBI_ACCESS_KEY,
+                secretAccessKey: import.meta.env.VITE_TEBI_SECRET_KEY,
+            },
+        });
+        const fileName = `dp-${name.split(" ").join("_")}-${Date.now()}.png`;
+        let uploadedUrl = null;
+        try {
+            await s3.send(new PutObjectCommand({
+                Bucket: 'profilepic',
+                Key: fileName,
+                Body: toUpload,
+                ContentType: profile_pic.type || 'image/png',
+            }));
+            uploadedUrl = `https://s3.tebi.io/profilepic/${fileName}`;
+        } catch (err) {
+            throw new Error('Không thể tải lên ảnh đại diện: ' + err.message);
+        }
+        profilePicUrl = uploadedUrl;
     } else {
-        profilePicUrl = `${supabaseUrl}/storage/v1/object/public/profile_pic/default_user.png`;
+        profilePicUrl = `https://s3.tebi.io/profilepic/default_user.png`;
     }
     const userData = {
         name,

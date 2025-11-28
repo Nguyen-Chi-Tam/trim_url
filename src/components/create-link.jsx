@@ -27,10 +27,7 @@ export function CreateLink(){
   // Hidden QR generator for short URL post-creation
   const genRef = useRef()
   const [qrToGenerate, setQrToGenerate] = useState(null)
-<<<<<<< HEAD
   const [generateQr, setGenerateQr] = useState(false)
-=======
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
   const [open, setOpen] = useState(false);
   // Number pickers for expiration time (HH:MM:SS)
   const [expHours, setExpHours] = useState(0)
@@ -196,7 +193,6 @@ export function CreateLink(){
       const rec = created?.[0];
       if (!rec) throw new Error("Không nhận được dữ liệu đường link vừa tạo");
 
-<<<<<<< HEAD
       // Step 2: Optionally generate QR from short URL and attach
       if (generateQr) {
         const shortFull = `https://trimurlz.me/${rec.short_url}`;
@@ -207,16 +203,6 @@ export function CreateLink(){
 
       // Step 3: Go to detail page
       navigate(`/link/${rec.short_url}`);
-=======
-      // Step 2: Generate QR from short URL and attach
-      const shortFull = `https://trimurlz.me/${rec.short_url}`;
-      const blob = await generateQrBlob(shortFull);
-      const file = new File([blob], "qrcode.png", { type: "image/png" });
-      await attachQrCode({ id: rec.id, short_url: rec.short_url }, file);
-
-      // Step 3: Go to detail page
-      navigate(`/link/${rec.id}`);
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
     } catch (e) {
       const newErrors = {};
 
@@ -345,7 +331,6 @@ export function CreateLink(){
           </>
         )}
 
-<<<<<<< HEAD
           <div className="flex items-center mt-4">
             <input
               type="checkbox"
@@ -358,8 +343,6 @@ export function CreateLink(){
             <span className="text-sm text-gray-500 ml-2">(Tùy chọn — tiết kiệm bộ nhớ nếu không cần)</span>
           </div>
 
-=======
->>>>>>> 6ccd49216e41637dfc7fca44f7b72dec7a98f7a4
   {error && <ErrorMessage message={normalizeErrorMessage(error)} />}
   {errors.general && <ErrorMessage message={errors.general} />}
 

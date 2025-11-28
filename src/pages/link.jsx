@@ -330,7 +330,7 @@ const Link = () => {
                     <QRCode value={qrToGenerate} size={300} ref={genRef} />
                   </div>
                 )}
-                <img src={url.qr_code ? url.qr_code : '/public/qr_not_found.png'}
+                <img src={url.qr_code ? url.qr_code : '/qr_not_found.png'}
                   className="self-center object-contain ring ring-blue-500 self-start"
                   alt="Mã QR" />
               </>
